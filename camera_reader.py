@@ -1,7 +1,9 @@
 import cv2
 import numpy as np
+
 #setting up the camera
-camera = cv2.VideoCapture(0) #index is a bit chaotic, not sure which one it initiates
+camera = cv2.VideoCapture(0) #need to check further what the input 0 of this function
+                             # means, this current version works on local machine
 
 def get_image(camera,n,want_pic=False):
     '''
@@ -13,14 +15,12 @@ def get_image(camera,n,want_pic=False):
     returns:
     data: arrays of images
     '''
-    data = np.zeros(n,dtype=object)
+    data = np.zeros((n,480,640)) # size of the image, will think about image compression later
     for i in range(n):
         ret, frame = camera.read()
-        data[i] = frame.astype('int32')
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        gray = np.array(gray)
+        data[i,:,:] = gray
         if want_pic == True:
             cv2.imwrite('image{}.png'.format(i), frame)
     return data
-
-#trying it out
-x = get_image(camera,10,want_pic=True)
-print(x)
