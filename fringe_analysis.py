@@ -5,7 +5,7 @@ Created on Mon Nov 21 20:39:39 2022
 @author: chaof
 """
 import numpy as np
-from scipy.fft import fft2,fftshift
+from numpy.fft import fft2,fftshift,ifftshift,fftfreq
 import matplotlib.pyplot as plt
 import cv2
 import os
@@ -28,12 +28,12 @@ def phase_diff(x,y,x0,y0,x1,y1,lambda_):
     return 2*np.pi/lambda_*(np.sqrt((x-x0)**2+(y-y0)**2)-np.sqrt((x-x1)**2+(y-y1)**2))
 
     
-x = np.linspace(0,999,1000)
-y = np.linspace(0,999,1000)
+x = np.linspace(0,1023,1024)
+y = np.linspace(0,1023,1024)
 x, y = np.meshgrid(x,y)
-z1 = Beam(x,y,700,300,200,100)
-z2 = Beam(x,y,700,300,200,100)
-delta = phase_diff(x,y,700,300,700,300,150)
+z1 = Beam(x,y,500,500,100,100)
+z2 = Beam(x,y,500,500,100,100)
+delta = phase_diff(x,y,500,500,500,500,100)
 
 plt.imshow(Interference(z1,z2,delta))
 
@@ -73,9 +73,50 @@ plt.show()
 
 #%%
 trial_img = Interference(z1,z2,delta)
-fft_trial = Fourier_Transform(trial_img)
+fft_trial = fft2(trial_img)
 fft_trial = fftshift(fft_trial)
+kx,ky = fftfreq(1024),fftfreq(1024)
+kx,ky = fftshift(kx),fftshift(ky)
+kx,ky = np.meshgrid(kx,ky)
 fig = plt.figure()
-ax = ax = fig.add_axes((0,0,10,10),projection='3d')
-ax.plot_surface(x,y,np.log10(abs(fft_trial)),cmap=cm.coolwarm)
+plt.rcParams.update({'font.size': 80})
+ax = fig.add_axes((0,0,10,10),projection='3d')
+ax.plot_surface(kx,ky,np.abs(fft_trial),cmap=cm.coolwarm)
 plt.show()
+plt.rcParams.update({'font.size': 10})
+plt.imshow(np.abs(fft_trial))
+
+#%%
+trial_img2 = np.zeros((1000,1000))
+for i in range(490,510):
+    for j in range(460,540):
+        trial_img2[i,j] += 200
+plt.imshow(trial_img2)
+plt.show()
+fft_trial = fft2(trial_img2)
+fft_trial = fftshift(fft_trial)
+plt.imshow(np.abs(fft_trial))
+plt.show()
+fig = plt.figure()
+ax = fig.add_axes((0,0,10,10),projection='3d')
+ax.plot_surface(x,y,np.abs(fft_trial),cmap=cm.coolwarm)
+
+#%%
+trial_img2 = np.zeros((1000,1000))
+for i in range(1000):
+    for j in range(1000):
+        if (i-500)**2+(j-500)**2 < 10**2:
+            trial_img2[i,j] += 200
+plt.imshow(trial_img2)
+plt.show()
+fft_trial = fft2(trial_img2)
+fft_trial = fftshift(fft_trial)
+plt.imshow(np.abs(fft_trial))
+plt.show()
+fig = plt.figure()
+ax = fig.add_axes((0,0,10,10),projection='3d')
+ax.plot_surface(x,y,np.abs(fft_trial),cmap=cm.coolwarm)
+
+#%%
+x = 
+
