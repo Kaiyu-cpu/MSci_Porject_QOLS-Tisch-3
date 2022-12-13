@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import time
-
+'''
 #setting up the camera
 cap = cv2.VideoCapture(0)
 
@@ -14,8 +14,9 @@ while True:
 
 cap.release()
 cv2.destroyAllWindows()
+'''
 #%%
-def get_image(camera,n,want_pic=False,t_delay = 0.125):
+def Get_image(camera,n,want_pic=False,t_delay = 0.125):
     '''
     the function that returns n image tensors
     params:
@@ -29,7 +30,8 @@ def get_image(camera,n,want_pic=False,t_delay = 0.125):
     for i in range(n):
         start = time.time()
         ret, frame = camera.read()
-        print(frame)
+        #print(frame)
+        print("get image")
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         gray = np.array(gray)
         gray = cv2.resize(gray,(64,64))
@@ -40,10 +42,3 @@ def get_image(camera,n,want_pic=False,t_delay = 0.125):
             continue
     return data
 
-#%%
-
-camera = cv2.VideoCapture(1)
-start = time.time()
-x = get_image(cap,2,want_pic = True)
-end = time.time()
-print(end-start)

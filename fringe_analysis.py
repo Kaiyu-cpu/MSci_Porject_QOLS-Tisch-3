@@ -57,7 +57,7 @@ def Zero_f_mask(n,epsilon=0.05):
                 arr[i,j] = 1
     return arr
 
-def Get_V(image):
+def Cal_V(image):
     '''
     Input:
         image: an image array of circular shape (n,n)

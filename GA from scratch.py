@@ -7,31 +7,39 @@ Created on Mon Dec 12 20:34:23 2022
 import random
 import subprocess
 import multiprocessing
+from camera_reader import Get_image
+from fringe_analysis import Cal_V
+import cv2
+import numpy as np
+import time
+
+
+
 
 def objective (x): #just for test
     return sum(x)
 
 def get_V(pop):
+    V_list=np.zeros(len(pop))
     for i in range(len(pop)):
-        a=0
-        #action(pop[i])
-        # take a photo
-        # calculate visibility
-        # append to V to a list
-    # return a list of V for all pop
+        action(pop[i])
+        image=Get_image(cap,1,t_delay=0)[0]
+        V_list[i]=Cal_V(image)
+    return V_list
 
-def action(V):
+def action(Volt):
     def change_V(No,V):
-        subprocess.run([r"\C#interface\KPZ101Console\bin\Debug\KPZ101Console.exe",No,V], capture_output=True, text=True)
+        subprocess.run(
+            [r"C:\Users\chaof\Documents\GitHub\MSci_Project_QOLS-Tisch-3\KPZ101Console\bin\Debug\KPZ101Console.exe",No,V], capture_output=True, text=True)
         #print(p.stdout)
-    V1=str(V[0])
-    V2=str(V[1])
-    V3=str(V[2])
-    V4=str(V[3])
-    SN1=""
-    SN2=""
-    SN3=""
-    SN4=""
+    V1=str(Volt[0])
+    V2=str(Volt[1])
+    V3=str(Volt[2])
+    V4=str(Volt[3])
+    SN1="29500948" #M V
+    SN2="29500732" #M H
+    SN3="29501050" #BS V
+    SN4="29500798" #BS H
     if __name__ ==  '__main__':   
         p1=multiprocessing.Process(target=change_V(SN1,V1))
         p2=multiprocessing.Process(target=change_V(SN2,V2))
@@ -57,7 +65,7 @@ def selection(pop, scores, k=3):
     index.remove(selected_index)
     for i in random.sample(index,k-1):
         # check if better (e.g. perform a tournament)
-        if scores[i] < scores[selected_index]:
+        if scores[i] > scores[selected_index]:
             selected_index = i
     return pop[selected_index]
 
@@ -85,26 +93,43 @@ def mutation(dna, p_mut): #p_mut is the prob of mutation
             dna[i] = random.randint(0,150)
     return dna
 
+
+#setting up the camera
+cap = cv2.VideoCapture(0)
+
+#while True:
+
+    #ret, frame = cap.read()
+   # cv2.imshow('frame',frame)
+    #if cv2.waitKey(1) & 0xFF == ord('q'):
+    #    break
+
+#cap.release()
+#cv2.destroyAllWindows()
+
+
+
+
 # initial population of random dna
-n_pop=8
+n_pop=4
 
 n_gene=4
 
 pop = [random.sample(range(0,150), n_gene) for _ in range(n_pop)]
 
 # keep track of best solution
-best_dna, best_score = 0, objective(pop[0])
+best_dna, best_score = 0, 0
 
 # enumerate generations
-n_iter=1000
+n_iter=1
 
 for gen in range(n_iter):
 
     # evaluate all candidates in the population
-    scores = [objective(c) for c in pop] # Replace with get_V()
+    scores = list(get_V(pop))
     
     # check for new best solution
-    best_score=min(scores)
+    best_score=max(scores)
     best_index=scores.index(best_score)
     best_dna=pop[best_index]
     print(">%d, new best f(%s) = %.3f" % (gen,  best_dna, best_score))
