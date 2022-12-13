@@ -8,11 +8,8 @@ Created on Sun Dec  4 15:23:33 2022
 
 #%% import packages
 import numpy as np
-from numpy.fft import fft2,fftshift,ifftshift,fftfreq
+from numpy.fft import fft2,fftshift,fftfreq
 import matplotlib.pyplot as plt
-import cv2
-import os
-from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 import PIL
 
@@ -43,11 +40,11 @@ def pol2cart(rho, phi):
 
 #%%
 
-x = np.linspace(0,99,100)
-y = np.linspace(0,99,100)
+x = np.linspace(0,63,64)
+y = np.linspace(0,63,64)
 x, y = np.meshgrid(x,y)
-image = Fringe(100,0.8,0.08,x,y,0.8)
-image = np.multiply(image,Aperture(100))
+image = Fringe(100,0.6,0.08,x,y,0.6)
+image = np.multiply(image,Aperture(64))
 plt.rcParams.update({'font.size': 10})
 plt.imshow(image, cmap='gray', vmin=0, vmax=255)
 #%%
@@ -143,3 +140,7 @@ plt.show()
 
 V = (max(I_adjusted)-min(I_adjusted))/(max(I_adjusted)+min(I_adjusted))
 print(V)
+
+#%%
+from fringe_analysis import Get_V
+print(Get_V(image))

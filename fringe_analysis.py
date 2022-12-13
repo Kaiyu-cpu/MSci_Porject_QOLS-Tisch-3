@@ -4,141 +4,103 @@ Created on Mon Nov 21 20:39:39 2022
 
 @author: chaof
 """
+
+# import packages
 import numpy as np
-from numpy.fft import fft2,fftshift,ifftshift,fftfreq
+from numpy.fft import fft2,fftshift,fftfreq
 import matplotlib.pyplot as plt
-import cv2
-import os
-from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
+import PIL
 
-#%%
-def Fourier_Transform(image):
-    fft_image = fft2(image)
-    return fft_image
+# functions to be used
+def Fringe(I0,V,f,x,y,phi):
+    '''
+    Inputs:
+        I0: beam intensity
+        V: visibility
+        f: frequency
+        x, y: position arguments
+        phi: phase difference between 2 beams
+    Output:
+        Interference Pattern of 2 beams with the given arguments.
+        Returns a matrix if guven (x,y) is matrix.
+    '''
+    return I0*(1+V*np.cos(2*np.pi*f*x*np.cos(phi)+2*np.pi*f*y*np.sin(phi)))
 
-def Beam(x,y,x0,y0,std,E0):
-    return (E0*np.exp(-((x-x0)**2+(y-y0)**2)/(2*std**2)))**2
+def Circular_Mask(d):
+    '''
+    Input:
+        d: diametre of the aperture. 
+            This should be the number of pixels of the given image.
+    Output:
+        arr: The circular mask. Returns 0  outside the aperture and 1 inside.
+    '''
+    r = d/2
+    arr = np.zeros((d,d))
+    for i in range(d):
+        for j in range(d):
+            if (i-r)**2+(j-r)**2 < r**2:
+                arr[i,j] = 1
+    return arr
 
-def Interference(Beam1,Beam2,delta):
-    return Beam1+Beam2+2*np.sqrt(Beam1*Beam2)*np.cos(delta)
+def Zero_f_mask(n,epsilon=0.05):
+    '''
+    Input:
+        epsilon: the amount of image to be covered by the mask. default = 0.05
+        n: the diametre of the image = pixels of the image.
+    Output:
+        arr: the circular mask. 0 inside the circle and 1 outside.
+    '''
+    r = n/2
+    arr = np.zeros((n,n))
+    for i in range(n):
+        for j in range(n):
+            if (i-r)**2+(j-r)**2 > n**2*epsilon**2:
+                arr[i,j] = 1
+    return arr
+
+def Get_V(image):
+    '''
+    Input:
+        image: an image array of circular shape (n,n)
+    Output:
+        V: the visibility reading from the image. range 0~1.
+    '''
+    N = len(image) # the side length of the image.
+    n = np.linspace(0,N-1,N) # create an array containing the indices
+    x, y = np.meshgrid(n,n) # create a grid
+    image = np.multiply(image, Circular_Mask(N)) # apply the aperture mask
     
+    fft_img = fftshift(fft2(image))
+    k = fftshift(fftfreq(N))
+    kx, ky = np.meshgrid(k,k)
+    power = np.square(abs(fft_img)) #get power spectrum
+    mask = Zero_f_mask(N) #create the 0-f mask
+    power = np.multiply(power,mask)
     
-def phase_diff(x,y,x0,y0,x1,y1,lambda_):
-    return 2*np.pi/lambda_*(np.sqrt((x-x0)**2+(y-y0)**2)-np.sqrt((x-x1)**2+(y-y1)**2))
-
+    #take the angle from the left hand plane of the image, 
+    #then do a rotation of the original image
+    half_plane = power[:,int(N/2):]
+    kx_half,ky_half = kx[:,int(N/2):],ky[:,int(N/2):]
+    ind = np.unravel_index(np.argmax(half_plane, axis=None), half_plane.shape)
+    rotation_angle = np.arctan(-ky_half[ind]/kx_half[ind])
+    image = PIL.Image.fromarray(image.astype('uint8'),'L')
+    image = image.rotate(-rotation_angle/(2*np.pi)*360)
+    rotated_arr = np.array(image)
     
-x = np.linspace(0,1023,1024)
-y = np.linspace(0,1023,1024)
-x, y = np.meshgrid(x,y)
-z1 = Beam(x,y,500,500,120,100)
-z2 = Beam(x,y,510,500,120,100)
-delta = phase_diff(x,y,500,500,510,500,100)
-
-plt.imshow(Interference(z1,z2,delta))
-
-
-
-#%%
-
-
-folder = 'fringes&visib/'  #paths to folder containing images
-images = []
-for filename in os.listdir(folder):
-    img = cv2.imread(os.path.join(folder,filename))
-    if img is not None:
-        images.append(img)
-
-fig = plt.figure(figsize=(20, 12),dpi=200) 
-count = [1,4,7,10,13,16]        
-for i in range(6):
-    image = cv2.cvtColor(images[i], cv2.COLOR_BGR2GRAY)
-    fft_image = Fourier_Transform(image)
-    fft_image = fftshift(fft_image)
-    ax = fig.add_subplot(6,3,count[i])
-    ax.imshow(image)
-    ax = fig.add_subplot(6,3,count[i]+1)
-    plot_spectrum(fft_image,ax)
-    ax = fig.add_subplot(6,3,count[i]+2,projection='3d')
-    nx, ny = fft_image.shape
-    x = np.linspace(0,nx-1,nx)
-    y = np.linspace(0,ny-1,ny)
-    x, y = np.meshgrid(x,y)
-    z = np.log10(np.abs(fft_image)).T
-    ax.plot_surface(x, y, z, cmap = cm.coolwarm)
+    #calculate visibility from here
+    #sum intensity over all pixel columns
+    I = np.zeros(N)
+    # count number of valid pixels over all pixel columns
+    N_pixels = np.zeros(N)
+    for i in range(N):
+        I[i] = np.sum(rotated_arr[:,i])
+        N_pixels[i] = np.sum(Circular_Mask(N)[:,i])
+    I_adjusted = I[1:]/N_pixels[1:]
+    V = (max(I_adjusted)-min(I_adjusted))/(max(I_adjusted)+min(I_adjusted))
     
-plt.tight_layout()
-plt.show()
-
-#%%
-trial_img = Interference(z1,z2,delta)
-fft_trial = fft2(trial_img)
-fft_trial = fftshift(fft_trial)
-kx,ky = fftfreq(1024),fftfreq(1024)
-kx,ky = fftshift(kx),fftshift(ky)
-kx,ky = np.meshgrid(kx,ky)
-
-fig = plt.figure()
-plt.rcParams.update({'font.size': 80})
-ax = fig.add_axes((0,0,10,10),projection='3d')
-ax.plot_surface(kx,ky,trial_img,cmap=cm.coolwarm)
+    return V
 
 
-fig = plt.figure()
-plt.rcParams.update({'font.size': 80})
-ax = fig.add_axes((0,0,10,10),projection='3d')
-ax.plot_surface(kx,ky,np.abs(fft_trial),cmap=cm.coolwarm)
-fig = plt.figure()
-plt.rcParams.update({'font.size': 80})
-ax = fig.add_axes((0,0,10,10),projection='3d')
-ax.plot_surface(kx,ky,np.log10(np.abs(fft_trial)),cmap=cm.coolwarm)
-plt.show()
-plt.rcParams.update({'font.size': 10})
-plt.imshow(np.abs(fft_trial))
-
-#%%
-trial_img2 = np.zeros((1024,1024))
-for i in range(500,524):
-    for j in range(490,534):
-        trial_img2[i,j] += 200
-plt.imshow(trial_img2)
-plt.show()
-fft_trial = fft2(trial_img2)
-fft_trial = fftshift(fft_trial)
-plt.imshow(np.abs(fft_trial))
-plt.show()
-fig = plt.figure()
-ax = fig.add_axes((0,0,10,10),projection='3d')
-ax.plot_surface(x,y,np.abs(fft_trial),cmap=cm.coolwarm)
-
-#%%
-trial_img2 = np.zeros((1000,1000))
-for i in range(1000):
-    for j in range(1000):
-        if (i-500)**2+(j-500)**2 < 10**2:
-            trial_img2[i,j] += 200
-plt.imshow(trial_img2)
-plt.show()
-fft_trial = fft2(trial_img2)
-fft_trial = fftshift(fft_trial)
-plt.imshow(np.abs(fft_trial))
-plt.show()
-fig = plt.figure()
-ax = fig.add_axes((0,0,10,10),projection='3d')
-ax.plot_surface(x,y,np.abs(fft_trial),cmap=cm.coolwarm)
-
-#%%
-trial_img2 = np.zeros((1024,1024))
-for i in range(1024):
-    for j in range(1024):
-        trial_img2[i,j] += np.exp(-((i-512)**2+(j-512)**2))
-
-plt.imshow(trial_img2)
-plt.show()
-fft_trial = fft2(trial_img2)
-fft_trial = fftshift(fft_trial)
-plt.imshow(np.abs(fft_trial))
-plt.show()
-fig = plt.figure()
-ax = fig.add_axes((0,0,10,10),projection='3d')
-ax.plot_surface(x,y,np.abs(fft_trial),cmap=cm.coolwarm)
+        
+    
