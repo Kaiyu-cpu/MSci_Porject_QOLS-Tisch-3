@@ -4,4 +4,14 @@ Module Description & Outlook:
 
 camera_reader: script that initialise the camera and take outputs from it
 
-fringe_analysis: take 2d FT of the fringe and plot surface & heatmap
+fringe_analysis_refined: defined a function that evaluates the objective of the project (V: visibility)
+
+Action table:
+
+29500798 -- Beam Splitter -- Horizontal
+
+29501050 -- Beam Splitter -- Vertical
+
+29500795 -- Mirror -- Horizontal
+
+29500948 -- Mirror -- Vertical
