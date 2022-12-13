@@ -31,12 +31,11 @@ def phase_diff(x,y,x0,y0,x1,y1,lambda_):
 x = np.linspace(0,1023,1024)
 y = np.linspace(0,1023,1024)
 x, y = np.meshgrid(x,y)
-z1 = Beam(x,y,500,500,100,100)
-z2 = Beam(x,y,500,500,100,100)
-delta = phase_diff(x,y,500,500,500,500,100)
+z1 = Beam(x,y,500,500,120,100)
+z2 = Beam(x,y,510,500,120,100)
+delta = phase_diff(x,y,500,500,510,500,100)
 
 plt.imshow(Interference(z1,z2,delta))
-
 
 
 
@@ -78,18 +77,29 @@ fft_trial = fftshift(fft_trial)
 kx,ky = fftfreq(1024),fftfreq(1024)
 kx,ky = fftshift(kx),fftshift(ky)
 kx,ky = np.meshgrid(kx,ky)
+
+fig = plt.figure()
+plt.rcParams.update({'font.size': 80})
+ax = fig.add_axes((0,0,10,10),projection='3d')
+ax.plot_surface(kx,ky,trial_img,cmap=cm.coolwarm)
+
+
 fig = plt.figure()
 plt.rcParams.update({'font.size': 80})
 ax = fig.add_axes((0,0,10,10),projection='3d')
 ax.plot_surface(kx,ky,np.abs(fft_trial),cmap=cm.coolwarm)
+fig = plt.figure()
+plt.rcParams.update({'font.size': 80})
+ax = fig.add_axes((0,0,10,10),projection='3d')
+ax.plot_surface(kx,ky,np.log10(np.abs(fft_trial)),cmap=cm.coolwarm)
 plt.show()
 plt.rcParams.update({'font.size': 10})
 plt.imshow(np.abs(fft_trial))
 
 #%%
-trial_img2 = np.zeros((1000,1000))
-for i in range(490,510):
-    for j in range(460,540):
+trial_img2 = np.zeros((1024,1024))
+for i in range(500,524):
+    for j in range(490,534):
         trial_img2[i,j] += 200
 plt.imshow(trial_img2)
 plt.show()
@@ -118,5 +128,17 @@ ax = fig.add_axes((0,0,10,10),projection='3d')
 ax.plot_surface(x,y,np.abs(fft_trial),cmap=cm.coolwarm)
 
 #%%
-x = 
+trial_img2 = np.zeros((1024,1024))
+for i in range(1024):
+    for j in range(1024):
+        trial_img2[i,j] += np.exp(-((i-512)**2+(j-512)**2))
 
+plt.imshow(trial_img2)
+plt.show()
+fft_trial = fft2(trial_img2)
+fft_trial = fftshift(fft_trial)
+plt.imshow(np.abs(fft_trial))
+plt.show()
+fig = plt.figure()
+ax = fig.add_axes((0,0,10,10),projection='3d')
+ax.plot_surface(x,y,np.abs(fft_trial),cmap=cm.coolwarm)
