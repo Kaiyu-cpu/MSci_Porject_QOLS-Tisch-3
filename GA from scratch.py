@@ -8,7 +8,7 @@ import random
 import subprocess
 import multiprocessing
 
-def objective (x): #jest for test
+def objective (x): #just for test
     return sum(x)
 
 def get_V(pop):
@@ -18,11 +18,11 @@ def get_V(pop):
         # take a photo
         # calculate visibility
         # append to V to a list
-    # retrun a list of V for all pop
+    # return a list of V for all pop
 
 def action(V):
     def change_V(No,V):
-        subprocess.run([r"D:\Thorlabs\C#Programs\KPZ101Console\bin\Debug\KPZ101Console.exe",No,V], capture_output=True, text=True)
+        subprocess.run([r"\C#interface\KPZ101Console\bin\Debug\KPZ101Console.exe",No,V], capture_output=True, text=True)
         #print(p.stdout)
     V1=str(V[0])
     V2=str(V[1])
