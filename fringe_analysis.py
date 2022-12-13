@@ -8,8 +8,6 @@ Created on Mon Nov 21 20:39:39 2022
 # import packages
 import numpy as np
 from numpy.fft import fft2,fftshift,fftfreq
-import matplotlib.pyplot as plt
-from matplotlib import cm
 import PIL
 
 # functions to be used
@@ -67,8 +65,6 @@ def Get_V(image):
         V: the visibility reading from the image. range 0~1.
     '''
     N = len(image) # the side length of the image.
-    n = np.linspace(0,N-1,N) # create an array containing the indices
-    x, y = np.meshgrid(n,n) # create a grid
     image = np.multiply(image, Circular_Mask(N)) # apply the aperture mask
     
     fft_img = fftshift(fft2(image))
