@@ -1,0 +1,9 @@
+D:\Thorlabs\C#Programs\KPZ101Console\obj\Debug\KPZ101Console.csprojAssemblyReference.cache
+D:\Thorlabs\C#Programs\KPZ101Console\obj\Debug\KPZ101Console.csproj.CoreCompileInputs.cache
+D:\Thorlabs\C#Programs\KPZ101Console\bin\Debug\KPZ101Console.exe.config
+D:\Thorlabs\C#Programs\KPZ101Console\bin\Debug\KPZ101Console.exe
+D:\Thorlabs\C#Programs\KPZ101Console\bin\Debug\KPZ101Console.pdb
+D:\Thorlabs\C#Programs\KPZ101Console\bin\Debug\Thorlabs.MotionControl.Tools.WPF.dll
+D:\Thorlabs\C#Programs\KPZ101Console\obj\Debug\KPZ101Console.csproj.CopyComplete
+D:\Thorlabs\C#Programs\KPZ101Console\obj\Debug\KPZ101Console.exe
+D:\Thorlabs\C#Programs\KPZ101Console\obj\Debug\KPZ101Console.pdb
