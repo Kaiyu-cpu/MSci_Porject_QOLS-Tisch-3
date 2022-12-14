@@ -11,13 +11,10 @@ from camera_reader import Get_image
 from fringe_analysis import Cal_V
 import cv2
 import numpy as np
-import time
+import matplotlib.pyplot as plt
 
-
-
-
-def objective (x): #just for test
-    return sum(x)
+#set up the camera
+cap = cv2.VideoCapture(0)
 
 def get_V(pop):
     V_list=np.zeros(len(pop))
@@ -94,22 +91,6 @@ def mutation(dna, p_mut): #p_mut is the prob of mutation
     return dna
 
 
-#setting up the camera
-cap = cv2.VideoCapture(0)
-
-#while True:
-
-    #ret, frame = cap.read()
-   # cv2.imshow('frame',frame)
-    #if cv2.waitKey(1) & 0xFF == ord('q'):
-    #    break
-
-#cap.release()
-#cv2.destroyAllWindows()
-
-
-
-
 # initial population of random dna
 n_pop=4
 
@@ -123,11 +104,22 @@ best_dna, best_score = 0, 0
 # enumerate generations
 n_iter=1
 
+scores = np.zeros(n_iter)
+
+# print improvements once in a while
+improvement = 0.0
+
 for gen in range(n_iter):
 
     # evaluate all candidates in the population
     scores = list(get_V(pop))
     
+    #append scores array to plot model performance
+    scores[gen] = max(scores)
+    if gen % 10 == 0:
+        print('Improvement after 10 iterations: ',max(scores)-improvement)
+        improvement = max(scores)
+        
     # check for new best solution
     best_score=max(scores)
     best_index=scores.index(best_score)
@@ -153,3 +145,8 @@ for gen in range(n_iter):
     pop = children
     
     
+plt.plot(scores)
+plt.xlabel('Number of Iterations')
+plt.ylabel('Visibility')
+plt.grid()
+plt.show()

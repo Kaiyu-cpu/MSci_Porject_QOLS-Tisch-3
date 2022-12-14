@@ -12,6 +12,7 @@ from numpy.fft import fft2,fftshift,fftfreq
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import PIL
+import cv2
 
 
 #%%
@@ -47,10 +48,32 @@ image = Fringe(100,0.6,0.08,x,y,0.6)
 image = np.multiply(image,Aperture(64))
 plt.rcParams.update({'font.size': 10})
 plt.imshow(image, cmap='gray', vmin=0, vmax=255)
+
+#%% test using a real image
+img = cv2.imread("test_img.jpg")
+plt.imshow(img)
+plt.show()
+#mg = img[:,560:]
+plt.imshow(img)
+plt.show()
+print(img.shape)
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+gray = np.array(gray)
+plt.imshow(gray,cmap='gray',vmin=0,vmax=255)
+plt.show()
+gray = cv2.resize(gray,(256,256))
+gray = np.multiply(gray,Aperture(256))
+plt.imshow(gray,cmap='gray',vmin=0,vmax=255)
+plt.show()
+
+image = gray
+
+
+
 #%%
 fft_trial = fft2(image)
 fft_trial = fftshift(fft_trial)
-kx,ky = fftfreq(100),fftfreq(100)
+kx,ky = fftfreq(256),fftfreq(256)
 kx,ky = fftshift(kx),fftshift(ky)
 kx,ky = np.meshgrid(kx,ky)
 
@@ -78,7 +101,7 @@ def Zero_f_mask(epsilon,n):
                 arr[i,j] = 1
     return arr
 
-mask = Zero_f_mask(0.05, 100)
+mask = Zero_f_mask(0.05, 256)
 
 masked_power = np.multiply(power,mask)
 fig = plt.figure()
@@ -93,9 +116,9 @@ plt.imshow(masked_power,cmap=cm.coolwarm,extent=[min(kx[0]),max(kx[0]),min(ky[0]
 
 
 #%% take the angle from the left hand plane of the image, do a rotation of the original image
-half_plane = masked_power[:,50:]
-kx_half,ky_half = kx[:,50:],ky[:,50:]
-plt.imshow(half_plane,cmap=cm.coolwarm,extent=[min(kx[0][50:]),max(kx[0][50:]),min(ky[0]),max(ky[-1])])
+half_plane = masked_power[:,128:]
+kx_half,ky_half = kx[:,128:],ky[:,128:]
+plt.imshow(half_plane,cmap=cm.coolwarm,extent=[min(kx[0][128:]),max(kx[0][128:]),min(ky[0]),max(ky[-1])])
 
 
 ind = np.unravel_index(np.argmax(half_plane, axis=None), half_plane.shape)

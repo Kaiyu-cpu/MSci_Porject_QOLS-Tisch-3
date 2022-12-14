@@ -1,10 +1,7 @@
 import cv2
 import numpy as np
 import time
-'''
-#setting up the camera
-cap = cv2.VideoCapture(0)
-
+''' this cell below is the test for camera
 while True:
 
     ret, frame = cap.read()
