@@ -80,18 +80,21 @@ namespace KPZ_Console_net_managed
             }
 
             // Wait for the device settings to initialize - timeout 5000ms
-            if (!device.IsSettingsInitialized())
+            string v = args[2];
+            if (v == "1")
             {
-                try
+                if (!device.IsSettingsInitialized())
                 {
-                    device.WaitForSettingsInitialized(5000);
-                }
-                catch (Exception)
-                {
-                    Console.WriteLine("Settings failed to initialize");
+                    try
+                    {
+                        device.WaitForSettingsInitialized(5000);
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("Settings failed to initialize");
+                    }
                 }
             }
-
             // Start the device polling
             // The polling loop requests regular status requests to the motor to ensure the program keeps track of the device. 
             device.StartPolling(250);
