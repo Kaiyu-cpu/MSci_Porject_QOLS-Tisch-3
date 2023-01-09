@@ -8,50 +8,36 @@ import random
 import subprocess
 import multiprocessing
 from camera_reader import Get_image
-from fringe_analysis import Cal_V
+from fringe_analysis import Cal_Visib
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+from KPZ101 import *
 
-#set up the camera
-cap = cv2.VideoCapture(0)
-
-def get_V(pop):
-    V_list=np.zeros(len(pop))
+def get_Visib(pop):
+    Visib_list=np.zeros(len(pop))
     for i in range(len(pop)):
         action(pop[i])
         image=Get_image(cap,1,t_delay=0)[0]
-        V_list[i]=Cal_V(image)
-    return V_list
+        Visib_list[i]=Cal_Visib(image)
+    return Visib_list
 
 def action(Volt):
-    def change_V(No,V):
-        subprocess.run(
-            [r"C:\Users\chaof\Documents\GitHub\MSci_Project_QOLS-Tisch-3\KPZ101Console\bin\Debug\KPZ101Console.exe",No,V], capture_output=True, text=True)
-        #print(p.stdout)
-    V1=str(Volt[0])
-    V2=str(Volt[1])
-    V3=str(Volt[2])
-    V4=str(Volt[3])
-    SN1="29500948" #M V
-    SN2="29500732" #M H
-    SN3="29501050" #BS V
-    SN4="29500798" #BS H
     if __name__ ==  '__main__':   
-        p1=multiprocessing.Process(target=change_V(SN1,V1))
-        p2=multiprocessing.Process(target=change_V(SN2,V2))
-        p3=multiprocessing.Process(target=change_V(SN3,V3))
-        p4=multiprocessing.Process(target=change_V(SN4,V4))
+        p0=multiprocessing.Process(target=Set_V(devices[0],Volt[0]))
+        p1=multiprocessing.Process(target=Set_V(devices[1],Volt[1]))
+        p2=multiprocessing.Process(target=Set_V(devices[2],Volt[2]))
+        p3=multiprocessing.Process(target=Set_V(devices[3],Volt[3]))
     
+        p0.start()
         p1.start()
         p2.start()
         p3.start()
-        p4.start()
         
+        p0.join()
         p1.join()
         p2.join()
         p3.join()
-        p4.join()
     return
     
 # tournament selection
@@ -90,11 +76,27 @@ def mutation(dna, p_mut): #p_mut is the prob of mutation
             dna[i] = random.randint(0,150)
     return dna
 
+#Serial numbers
+SN1="29500948" #M V
+SN2="29500732" #M H
+SN3="29501050" #BS V
+SN4="29500798" #BS H
+
+Serial_num = [SN1, SN2, SN3, SN4]
+
+
+#set up the camera
+cap = cv2.VideoCapture(0)
+
+#set up devices
+devices = []
+for i in Serial_num:
+    devices.append(Initialise(i))
 
 # initial population of random dna
-n_pop=4
+n_pop = 4
 
-n_gene=4
+n_gene = 4
 
 pop = [random.sample(range(0,150), n_gene) for _ in range(n_pop)]
 
@@ -112,7 +114,7 @@ improvement = 0.0
 for gen in range(n_iter):
 
     # evaluate all candidates in the population
-    scores = list(get_V(pop))
+    scores = list(get_Visib(pop))
     
     #append scores array to plot model performance
     scores[gen] = max(scores)
@@ -143,7 +145,9 @@ for gen in range(n_iter):
     
     # replace population
     pop = children
-    
+
+for i in devices: #shut down all devices
+    Kill(i)    
     
 plt.plot(scores)
 plt.xlabel('Number of Iterations')
