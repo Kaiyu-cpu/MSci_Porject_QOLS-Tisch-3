@@ -7,3 +7,13 @@ D:\Thorlabs\C#Programs\KPZ101Console\bin\Debug\Thorlabs.MotionControl.Tools.WPF.
 D:\Thorlabs\C#Programs\KPZ101Console\obj\Debug\KPZ101Console.csproj.CopyComplete
 D:\Thorlabs\C#Programs\KPZ101Console\obj\Debug\KPZ101Console.exe
 D:\Thorlabs\C#Programs\KPZ101Console\obj\Debug\KPZ101Console.pdb
+C:\Users\chaof\Documents\GitHub\MSci_Project_QOLS-Tisch-3\KPZ101Console\bin\Debug\KPZ101Console.exe.config
+C:\Users\chaof\Documents\GitHub\MSci_Project_QOLS-Tisch-3\KPZ101Console\bin\Debug\KPZ101Console.exe
+C:\Users\chaof\Documents\GitHub\MSci_Project_QOLS-Tisch-3\KPZ101Console\bin\Debug\KPZ101Console.pdb
+C:\Users\chaof\Documents\GitHub\MSci_Project_QOLS-Tisch-3\KPZ101Console\bin\Debug\Thorlabs.MotionControl.Tools.WPF.dll
+C:\Users\chaof\Documents\GitHub\MSci_Project_QOLS-Tisch-3\KPZ101Console\obj\Debug\KPZ101Console.csproj.AssemblyReference.cache
+C:\Users\chaof\Documents\GitHub\MSci_Project_QOLS-Tisch-3\KPZ101Console\obj\Debug\KPZ101Console.csproj.SuggestedBindingRedirects.cache
+C:\Users\chaof\Documents\GitHub\MSci_Project_QOLS-Tisch-3\KPZ101Console\obj\Debug\KPZ101Console.csproj.CoreCompileInputs.cache
+C:\Users\chaof\Documents\GitHub\MSci_Project_QOLS-Tisch-3\KPZ101Console\obj\Debug\KPZ101Console.csproj.CopyComplete
+C:\Users\chaof\Documents\GitHub\MSci_Project_QOLS-Tisch-3\KPZ101Console\obj\Debug\KPZ101Console.exe
+C:\Users\chaof\Documents\GitHub\MSci_Project_QOLS-Tisch-3\KPZ101Console\obj\Debug\KPZ101Console.pdb
