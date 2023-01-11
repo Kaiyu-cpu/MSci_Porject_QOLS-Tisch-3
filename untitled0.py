@@ -1,20 +1,21 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Jan  9 14:39:33 2023
+Created on Wed Jan 11 14:01:44 2023
 
-@author: Owen
+@author: chaof
 """
 
 """
 kpz101_pythonnet
 ==================
+
 An example of using the .NET API with the pythonnet package for controlling a KPZ101
 """
 import os
 import time
 import sys
 import clr
-
+#%%
 clr.AddReference("C:\\Program Files\\Thorlabs\\Kinesis\\Thorlabs.MotionControl.DeviceManagerCLI.dll")
 clr.AddReference("C:\\Program Files\\Thorlabs\\Kinesis\\Thorlabs.MotionControl.GenericMotorCLI.dll")
 clr.AddReference("C:\\Program Files\\Thorlabs\\Kinesis\\ThorLabs.MotionControl.KCube.PiezoCLI.dll")
@@ -22,8 +23,8 @@ from Thorlabs.MotionControl.DeviceManagerCLI import *
 from Thorlabs.MotionControl.GenericMotorCLI import *
 from Thorlabs.MotionControl.KCube.PiezoCLI import *
 from System import Decimal  # necessary for real world units
+#%%
 
-'''
 def main():
     """The main entry point for the application"""
 
@@ -35,11 +36,16 @@ def main():
         DeviceManagerCLI.BuildDeviceList()
 
         # create new device
-        serial_no = "26000001"  # Replace this line with your device's serial number
+        serial_no = "29500948"  # Replace this line with your device's serial number
 
         # Connect, begin polling, and enable
         device = KCubePiezo.CreateKCubePiezo(serial_no)
-
+        if not device == None:
+            device.Connect(serial_no)
+            print(device.IsSettingsInitialized())
+            if not device.IsSettingsInitialized():
+                device.WaitForSettingsInitialized(3000)
+            
         # Get Device Information and display description
         device_info = device.GetDeviceInfo()
         print(device_info.Description)
@@ -47,13 +53,10 @@ def main():
         # Start polling and enable
         device.StartPolling(250)  #250ms polling rate
         time.sleep(25)
-        device.Enable()
+        device.EnableDevice()
         time.sleep(0.25)  # Wait for device to enable
 
-        if not device.IsSettingsInitialized():
-            device.WaitForSettingsInitialized(10000)  # 10 second timeout
-            assert device.IsSettingsInitialized() is True
-
+    
         # Load the device configuration
         device_config = device.GetPiezoConfiguration(serial_no)
 
@@ -88,59 +91,7 @@ def main():
     # Uncomment this line if you are using Simulations
     # SimulationManager.Instance.UnitializeSimulations()
     ...
- 
+
 
 if __name__ == "__main__":
     main()
-    
-'''
-
-def Initialise(snum): # type(snum)=str
-
-        DeviceManagerCLI.BuildDeviceList()
-    
-        # create new device  
-        # Connect, begin polling, and enable
-        device = KCubePiezo.CreateKCubePiezo(snum)
-        device.Connect(snum)
-        # Get Device Information and display description
-        #device_info = device.GetDeviceInfo()
-        #print(device_info.Description)
-    
-        # Start polling and enable
-        device.StartPolling(250)  #250ms polling rate
-        time.sleep(25)
-        device.EnableDevice()
-        time.sleep(0.25)  # Wait for device to enable
-    
-        if not device.IsSettingsInitialized():
-            device.WaitForSettingsInitialized(5000)  # 5 second timeout
-            assert device.IsSettingsInitialized() is True
-    
-        # Load the device configuration
-        #device_config = device.GetPiezoConfiguration(serial_no)
-    
-        # This shows how to obtain the device settings
-        #device_settings = device.PiezoDeviceSettings
-    
-        # Set the Zero point of the device
-        #print("Setting Zero Point")
-        device.SetZero()
-        
-        return device
-    
-def Set_V(device,V):
-    # Get the maximum voltage output of the KPZ
-    #max_voltage = device.GetMaxOutputVoltage()  # This is stored as a .NET decimal
-
-    # Go to a voltage
-    dev_voltage = Decimal(V)
-    #print(f'Going to voltage {dev_voltage}')
-
-    device.SetOutputVoltage(dev_voltage)
-    time.sleep(1)
-
-def Kill(device):
-    device.StopPolling()
-    device.Disconnect()
-    

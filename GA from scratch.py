@@ -5,15 +5,15 @@ Created on Mon Dec 12 20:34:23 2022
 @author: Owen
 """
 import random
-import subprocess
+
 import multiprocessing
 from camera_reader import Get_image
 from fringe_analysis import Cal_Visib
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-from KPZ101 import *
-
+from KPZ101 import Initialise, Set_V, Kill
+#%%
 def get_Visib(pop):
     Visib_list=np.zeros(len(pop))
     for i in range(len(pop)):
