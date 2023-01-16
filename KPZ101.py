@@ -134,7 +134,7 @@ def Set_V(device,V):
     #max_voltage = device.GetMaxOutputVoltage()  # This is stored as a .NET decimal
 
     # Go to a voltage
-    dev_voltage = Decimal(V)
+    dev_voltage = Decimal.Parse(V)
     #print(f'Going to voltage {dev_voltage}')
 
     device.SetOutputVoltage(dev_voltage)

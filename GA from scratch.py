@@ -93,6 +93,8 @@ devices = []
 for i in Serial_num:
     devices.append(Initialise(i))
 
+#%%
+
 # initial population of random dna
 n_pop = 4
 
@@ -106,7 +108,7 @@ best_dna, best_score = 0, 0
 # enumerate generations
 n_iter=1
 
-scores = np.zeros(n_iter)
+scores_list = np.zeros(n_iter)
 
 # print improvements once in a while
 improvement = 0.0
@@ -117,10 +119,10 @@ for gen in range(n_iter):
     scores = list(get_Visib(pop))
     
     #append scores array to plot model performance
-    scores[gen] = max(scores)
-    if gen % 10 == 0:
-        print('Improvement after 10 iterations: ',max(scores)-improvement)
-        improvement = max(scores)
+    scores_list[gen] = max(scores)
+    #if gen % 10 == 0:
+        #print('Improvement after 10 iterations: ',max(scores)-improvement)
+        #improvement = max(scores)
         
     # check for new best solution
     best_score=max(scores)
@@ -149,7 +151,7 @@ for gen in range(n_iter):
 for i in devices: #shut down all devices
     Kill(i)    
     
-plt.plot(scores)
+plt.plot(scores_list,'o')
 plt.xlabel('Number of Iterations')
 plt.ylabel('Visibility')
 plt.grid()

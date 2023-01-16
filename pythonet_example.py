@@ -68,19 +68,20 @@ def main():
         device.SetZero()
 
         # Get the maximum voltage output of the KPZ
-        max_voltage = device.GetMaxOutputVoltage()  # This is stored as a .NET decimal
+        #max_voltage = device.GetMaxOutputVoltage()  # This is stored as a .NET decimal
 
         # Go to a voltage
-        dev_voltage = Decimal(15.0)
+        dev_voltage = Decimal(30.0)
+        #dev_voltage = 15
         print(f'Going to voltage {dev_voltage}')
 
-        if dev_voltage != 0 and dev_voltage <= max_voltage:
-            device.SetOutputVoltage(dev_voltage)
-            time.Sleep(1)
+        #if dev_voltage != 0 and dev_voltage <= max_voltage:
+        device.SetOutputVoltage(dev_voltage)
+        time.sleep(1)
 
-            print(f'Moved to Voltage {device.GetOutputVoltage()}')
-        else:
-            print(f'Voltage must be between 0 and {max_voltage}')
+        print(f'Moved to Voltage {device.GetOutputVoltage()}')
+        #else:
+            #print(f'Voltage must be between 0 and {max_voltage}')
 
         # Stop Polling and Disconnect
         device.StopPolling()
