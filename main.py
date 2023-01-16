@@ -12,7 +12,7 @@ from fringe_analysis import Cal_Visib
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-from KPZ101 import Initialise, Set_V, Kill
+#from KPZ101 import Initialise, Set_V, Kill
 from Genetic_Algorithm import GA
 #%%
 def linear(pop):
@@ -61,7 +61,8 @@ def action(Volt):
         p3.join()
     return
 
-#%%
+#%% Initilise K-Cubes and camera
+
 #Serial numbers
 SN1="29500948" #M V
 SN2="29500732" #M H
@@ -79,32 +80,56 @@ devices = []
 for i in Serial_num:
     devices.append(Initialise(i))
 
-#%%
+#%% Run GA get scores
 
 # initial population of random dna
 n_pop = 16
 n_gene = 4
 pop = [random.sample(range(0,150), n_gene) for _ in range(n_pop)]
 
-# GA is used to MAXIMISE the target function
-scores=GA(pop,target=non_linear,n_iter=1000,tournament_size=3)
-  
-plt.plot(scores)
+n_run=20
+scores_ensemble=[]
+
+for i in range (n_run):
+    # GA is used to MAXIMISE the target function
+    scores=GA(pop,target=non_linear,n_iter=1000,tournament_size=3)
+    scores_ensemble.append(scores)
+scores_ensemble=np.array(scores_ensemble)
+ensemble_mean=scores_ensemble.mean(axis=0)
+
+#%% Plot of score vs iteration
+
+stop_list=np.zeros(n_run)
+
+for i in range (n_run):
+    plt.plot(scores_ensemble[i],alpha=0.5,linewidth=1)
+    # find the stop point 
+    temp=0
+    stop=0
+    for j in range (1,len(scores_ensemble[i])):
+        if scores_ensemble[i][j]!=scores_ensemble[i][j-1]:
+            temp=0
+        if temp>=100:
+            stop=j
+            stop_list[i]=stop
+            break
+        temp+=1
+    plt.plot(stop,scores_ensemble[i][stop],'.',color='r', alpha=0.7)
+
 plt.xlabel('Number of Iterations')
 plt.ylabel('Score')
 plt.grid()
 
-# find the stop point 
-temp=0
-stop=0
-for i in range (1,len(scores)):
-    if scores[i]!=scores[i-1]:
-        temp=0
-    if temp>=100:
-        stop=i
-        break
-    temp+=1
-plt.plot(stop,scores[stop],'o',color='r')
+plt.plot(ensemble_mean,linewidth=3,label='ensemble mean')
+
+stop_mean=int(np.ceil(np.mean(stop_list))) # rounded up
+plt.plot(stop_mean,ensemble_mean[stop_mean],'o',color='r',label='stop point')
+
+end_score=round(ensemble_mean[stop_mean],2)
+plt.title(f'non-linear, pop={n_pop}, avg stop point={stop_mean}th iter, avg ending score={end_score}')
+
+plt.legend()
+
 plt.show()
 
 #%% 3D plot of test function
@@ -129,8 +154,75 @@ Max=0
 for i in range (len(xx1)):
     if max(y[i])>Max:
         Max=max(y[i])
-        
 
+plt.show()
+        
+#%% Calculate stop point vs pop
+
+n_run=20 #number of runs in an ensemble
+stop_mean_list=[]
+end_score_list=[]
+
+for pop_size in range (4,21,2):
+    
+    n_gene = 4
+    pop = [random.sample(range(0,150), n_gene) for _ in range(pop_size)]
+    
+    scores_ensemble=[]
+    
+    for i in range (n_run):
+        # GA is used to MAXIMISE the target function
+        scores=GA(pop,target=non_linear,n_iter=1000,tournament_size=3)
+        scores_ensemble.append(scores)
+    
+    scores_ensemble=np.array(scores_ensemble)
+    ensemble_mean=scores_ensemble.mean(axis=0)
+        
+    stop_list=np.zeros(n_run)
+
+    for i in range (n_run):
+        # find the stop point 
+        temp=0
+        stop=0
+        for j in range (1,len(scores_ensemble[i])):
+            if scores_ensemble[i][j]!=scores_ensemble[i][j-1]:
+                temp=0
+            if temp>=100:
+                stop=j
+                stop_list[i]=stop
+                break
+            temp+=1
+            
+    stop_mean=int(np.ceil(np.mean(stop_list))) # rounded up
+    end_score=round(ensemble_mean[stop_mean],2) # rounded to 2 d.p.
+    stop_mean_list.append(stop_mean)
+    end_score_list.append(end_score)
+
+#%% Plot stop point vs pop
+
+pop_size=[i for i in range(4,21,2)]
+
+# create figure and axis objects with subplots()
+fig,ax = plt.subplots()
+# make a plot
+ax.plot(pop_size,
+        stop_mean_list,
+        color="red", 
+        marker="o")
+# set x-axis label
+ax.set_xlabel("population size", fontsize = 14)
+# set y-axis label
+ax.set_ylabel("average stop point",
+              color="red",
+              fontsize=14)
+
+# twin object for two different y-axis on the sample plot
+ax2=ax.twinx()
+# make a plot with different y-axis using second axis object
+ax2.plot(pop_size, end_score_list,color="blue",marker="o")
+ax2.set_ylabel("average ending score",color="blue",fontsize=14)
+plt.title(f'non-linear target function, ensemble size={n_run}')
+plt.show()
 
 
 
