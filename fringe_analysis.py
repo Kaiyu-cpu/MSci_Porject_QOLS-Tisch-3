@@ -94,6 +94,7 @@ def Cal_Visib(image):
         N_pixels[i] = np.sum(Circular_Mask(N)[:,i])
     I_adjusted = I[1:]/N_pixels[1:]
     V = (max(I_adjusted)-min(I_adjusted))/(max(I_adjusted)+min(I_adjusted))
+    print('calculate visib')
     
     return V
 

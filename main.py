@@ -11,9 +11,10 @@ from camera_reader import Get_image
 from fringe_analysis import Cal_Visib
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
-#from KPZ101 import Initialise, Set_V, Kill
+from KPZ101 import Initialise, Set_V, Kill, ISK
 from Genetic_Algorithm import GA
+import matplotlib.pyplot as plt
+import time
 #%%
 def linear(pop):
     scores=[]
@@ -44,6 +45,7 @@ def get_Visib(pop):
     return Visib_list
 
 def action(Volt):
+    '''
     if __name__ ==  '__main__':   
         p0=multiprocessing.Process(target=Set_V(devices[0],Volt[0]))
         p1=multiprocessing.Process(target=Set_V(devices[1],Volt[1]))
@@ -59,9 +61,16 @@ def action(Volt):
         p1.join()
         p2.join()
         p3.join()
+    '''
+    for i in range (4):
+        Set_V(devices[i],Volt[i])
+    
     return
 
 #%% Initilise K-Cubes and camera
+
+#set up the camera
+cap = cv2.VideoCapture(0)
 
 #Serial numbers
 SN1="29500948" #M V
@@ -72,9 +81,6 @@ SN4="29500798" #BS H
 Serial_num = [SN1, SN2, SN3, SN4]
 
 
-#set up the camera
-cap = cv2.VideoCapture(0)
-
 #set up devices
 devices = []
 for i in Serial_num:
@@ -83,19 +89,30 @@ for i in Serial_num:
 #%% Run GA get scores
 
 # initial population of random dna
-n_pop = 16
+n_pop = 8
 n_gene = 4
-pop = [random.sample(range(0,150), n_gene) for _ in range(n_pop)]
+pop = [random.sample(range(0,75), n_gene) for _ in range(n_pop)]
 
-n_run=20
+n_run=1
+n_iteration=10
 scores_ensemble=[]
+
+start=time.time()
 
 for i in range (n_run):
     # GA is used to MAXIMISE the target function
-    scores=GA(pop,target=non_linear,n_iter=1000,tournament_size=3)
+    scores=GA(pop,target=get_Visib,n_iter=n_iteration,tournament_size=3)
     scores_ensemble.append(scores)
+
+end=time.time()
+t=end-start
+print(f'time taken for {n_iteration}iter is {t}')
 scores_ensemble=np.array(scores_ensemble)
 ensemble_mean=scores_ensemble.mean(axis=0)
+
+#%%
+for i in range (4):
+    Kill(devices[i])
 
 #%% Plot of score vs iteration
 

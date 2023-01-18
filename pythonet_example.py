@@ -71,7 +71,7 @@ def main():
         #max_voltage = device.GetMaxOutputVoltage()  # This is stored as a .NET decimal
 
         # Go to a voltage
-        dev_voltage = Decimal(30.0)
+        dev_voltage = Decimal(30)
         #dev_voltage = 15
         print(f'Going to voltage {dev_voltage}')
 

@@ -23,78 +23,6 @@ from Thorlabs.MotionControl.GenericMotorCLI import *
 from Thorlabs.MotionControl.KCube.PiezoCLI import *
 from System import Decimal  # necessary for real world units
 
-'''
-def main():
-    """The main entry point for the application"""
-
-    # Uncomment this line if you are using
-    # SimulationManager.Instance.InitializeSimulations()
-
-    try:
-
-        DeviceManagerCLI.BuildDeviceList()
-
-        # create new device
-        serial_no = "26000001"  # Replace this line with your device's serial number
-
-        # Connect, begin polling, and enable
-        device = KCubePiezo.CreateKCubePiezo(serial_no)
-
-        # Get Device Information and display description
-        device_info = device.GetDeviceInfo()
-        print(device_info.Description)
-
-        # Start polling and enable
-        device.StartPolling(250)  #250ms polling rate
-        time.sleep(25)
-        device.Enable()
-        time.sleep(0.25)  # Wait for device to enable
-
-        if not device.IsSettingsInitialized():
-            device.WaitForSettingsInitialized(10000)  # 10 second timeout
-            assert device.IsSettingsInitialized() is True
-
-        # Load the device configuration
-        device_config = device.GetPiezoConfiguration(serial_no)
-
-        # This shows how to obtain the device settings
-        device_settings = device.PiezoDeviceSettings
-
-        # Set the Zero point of the device
-        print("Setting Zero Point")
-        device.SetZero()
-
-        # Get the maximum voltage output of the KPZ
-        max_voltage = device.GetMaxOutputVoltage()  # This is stored as a .NET decimal
-
-        # Go to a voltage
-        dev_voltage = Decimal(15.0)
-        print(f'Going to voltage {dev_voltage}')
-
-        if dev_voltage != 0 and dev_voltage <= max_voltage:
-            device.SetOutputVoltage(dev_voltage)
-            time.Sleep(1)
-
-            print(f'Moved to Voltage {device.GetOutputVoltage()}')
-        else:
-            print(f'Voltage must be between 0 and {max_voltage}')
-
-        # Stop Polling and Disconnect
-        device.StopPolling()
-        device.Disconnect()
-    except Exception as e:
-        print(e)
-
-    # Uncomment this line if you are using Simulations
-    # SimulationManager.Instance.UnitializeSimulations()
-    ...
- 
-
-if __name__ == "__main__":
-    main()
-    
-'''
-
 def Initialise(snum): # type(snum)=str
 
         DeviceManagerCLI.BuildDeviceList()
@@ -102,45 +30,99 @@ def Initialise(snum): # type(snum)=str
         # create new device  
         # Connect, begin polling, and enable
         device = KCubePiezo.CreateKCubePiezo(snum)
-        device.Connect(snum)
+        if not device == None:
+            device.Connect(snum)
+            #print(device.IsSettingsInitialized())
+            if not device.IsSettingsInitialized():
+                device.WaitForSettingsInitialized(1000) #initilise
+        
         # Get Device Information and display description
         #device_info = device.GetDeviceInfo()
         #print(device_info.Description)
     
         # Start polling and enable
         device.StartPolling(250)  #250ms polling rate
-        time.sleep(25)
+        time.sleep(1)
         device.EnableDevice()
         time.sleep(0.25)  # Wait for device to enable
     
-        if not device.IsSettingsInitialized():
-            device.WaitForSettingsInitialized(5000)  # 5 second timeout
-            assert device.IsSettingsInitialized() is True
-    
         # Load the device configuration
-        #device_config = device.GetPiezoConfiguration(serial_no)
+        device_config = device.GetPiezoConfiguration(snum)
     
         # This shows how to obtain the device settings
-        #device_settings = device.PiezoDeviceSettings
+        device_settings = device.PiezoDeviceSettings
     
         # Set the Zero point of the device
         #print("Setting Zero Point")
         device.SetZero()
+        print('device',snum,'initialised')
         
         return device
     
 def Set_V(device,V):
     # Get the maximum voltage output of the KPZ
     #max_voltage = device.GetMaxOutputVoltage()  # This is stored as a .NET decimal
-
+    
+    #device.SetZero()
     # Go to a voltage
-    dev_voltage = Decimal.Parse(V)
-    #print(f'Going to voltage {dev_voltage}')
+    dev_voltage = Decimal(V)
+    print(f'Going to voltage {dev_voltage}')
 
     device.SetOutputVoltage(dev_voltage)
-    time.sleep(1)
+    time.sleep(0.5)
+    print(f'Moved to Voltage {device.GetOutputVoltage()}')
+    
+
 
 def Kill(device):
     device.StopPolling()
     device.Disconnect()
+    print('device killed')
+    
+def ISK(snum,V):
+        
+    DeviceManagerCLI.BuildDeviceList()
+
+    # create new device  
+    # Connect, begin polling, and enable
+    device = KCubePiezo.CreateKCubePiezo(snum)
+    if not device == None:
+        device.Connect(snum)
+        #print(device.IsSettingsInitialized())
+        if not device.IsSettingsInitialized():
+            device.WaitForSettingsInitialized(1000) #initilise
+    
+    # Get Device Information and display description
+    #device_info = device.GetDeviceInfo()
+    #print(device_info.Description)
+
+    # Start polling and enable
+    device.StartPolling(250)  #250ms polling rate
+    time.sleep(1)
+    device.EnableDevice()
+    time.sleep(0.25)  # Wait for device to enable
+
+    # Load the device configuration
+    device_config = device.GetPiezoConfiguration(snum)
+
+    # This shows how to obtain the device settings
+    device_settings = device.PiezoDeviceSettings
+
+    # Set the Zero point of the device
+    #print("Setting Zero Point")
+    device.SetZero()
+    print('device',snum,'initialised')
+    dev_voltage = Decimal(V)
+    print(f'Going to voltage {dev_voltage}')
+
+    device.SetOutputVoltage(dev_voltage)
+    time.sleep(1)
+    #while (device.GetOutputVoltage()<=Decimal(0.5)):
+        #device.SetOutputVoltage(dev_voltage)
+        #time.sleep(1)
+        #print(f'Moved to Voltage {device.GetOutputVoltage()}')
+    print(f'Moved to Voltage {device.GetOutputVoltage()}')
+    device.StopPolling()
+    device.Disconnect()
+    
     

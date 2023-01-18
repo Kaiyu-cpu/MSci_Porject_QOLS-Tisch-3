@@ -7,6 +7,7 @@ Created on Sun Jan 15 21:47:46 2023
 import random
 import numpy as np
 import matplotlib.pyplot as plt
+from camera_reader import Get_image
 
 def GA(pop, target, n_iter=1, p_cross=0.9, p_mut=0.1, tournament_size=3, Print=False):
     
@@ -84,5 +85,5 @@ def mutation(dna, p_mut): #p_mut is the prob of mutation
         # check for a mutation
         if random.randint(0,99) < p_mut*100:
             # mutate the gene
-            dna[i] = random.randint(0,150)
+            dna[i] = random.randint(0,75)
     return dna
