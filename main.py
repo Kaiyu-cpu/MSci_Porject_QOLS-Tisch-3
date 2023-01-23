@@ -4,18 +4,20 @@ Created on Sun Jan 15 22:41:02 2023
 
 @author: Owen
 """
-
 import random
 import multiprocessing
 from camera_reader import Get_image
 from fringe_analysis import Cal_Visib
 import cv2
 import numpy as np
-from KPZ101 import Initialise, Set_V, Kill, ISK
+from KPZ101 import Initialise, Set_V, Kill
 from Genetic_Algorithm import GA
 import matplotlib.pyplot as plt
 import time
-#%%
+
+
+#%% 
+
 def linear(pop):
     scores=[]
     for i in range (len(pop)):
@@ -40,7 +42,12 @@ def get_Visib(pop):
     Visib_list=np.zeros(len(pop))
     for i in range(len(pop)):
         action(pop[i])
-        image=Get_image(cap,1,t_delay=0)[0]
+        image=Get_image(cap,want_pic=False)
+        global count
+        pop_num=count%8
+        iteration_num=count//8
+        count += 1
+        #cv2.imwrite(f'iteration {iteration_num}, population {pop_num}.png',image)
         Visib_list[i]=Cal_Visib(image)
     return Visib_list
 
@@ -87,6 +94,8 @@ for i in Serial_num:
     devices.append(Initialise(i))
 
 #%% Run GA get scores
+
+count = 0
 
 # initial population of random dna
 n_pop = 8
