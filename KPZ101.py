@@ -60,10 +60,12 @@ def Initialise(snum): # type(snum)=str
         return device
     
 def Set_V(device,V):
-    # Get the maximum voltage output of the KPZ
-    #max_voltage = device.GetMaxOutputVoltage()  # This is stored as a .NET decimal
+    # Load the device configuration
+    device_config = device.GetPiezoConfiguration(snum)
+
+    # This shows how to obtain the device settings
+    device_settings = device.PiezoDeviceSettings
     
-    #device.SetZero()
     # Go to a voltage
     dev_voltage = Decimal(V)
     print(f'Going to voltage {dev_voltage}')

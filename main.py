@@ -53,26 +53,13 @@ def get_Visib(pop):
 
 def action(Volt):
     '''
-    if __name__ ==  '__main__':   
-        p0=multiprocessing.Process(target=Set_V(devices[0],Volt[0]))
-        p1=multiprocessing.Process(target=Set_V(devices[1],Volt[1]))
-        p2=multiprocessing.Process(target=Set_V(devices[2],Volt[2]))
-        p3=multiprocessing.Process(target=Set_V(devices[3],Volt[3]))
+    function to adjust the voltages of the kpz piezos
+    Input: Volt - type list: the input voltages of 4 mounts
     
-        p0.start()
-        p1.start()
-        p2.start()
-        p3.start()
-        
-        p0.join()
-        p1.join()
-        p2.join()
-        p3.join()
     '''
     for i in range (4):
         Set_V(devices[i],Volt[i])
     
-    return
 
 #%% Initilise K-Cubes and camera
 
@@ -119,7 +106,7 @@ print(f'time taken for {n_iteration}iter is {t}')
 scores_ensemble=np.array(scores_ensemble)
 ensemble_mean=scores_ensemble.mean(axis=0)
 
-#%%
+#%% this cell shuts down all devices
 for i in range (4):
     Kill(devices[i])
 
