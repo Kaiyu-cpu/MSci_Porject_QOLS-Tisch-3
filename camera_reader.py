@@ -18,7 +18,7 @@ def Get_image(camera):
     print("image shot")
     data = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     data = np.array(data)
-    data = cv2.resize(data,(256,256)) #here, need to think about whether to directly reshape
+    data = cv2.resize(data,(64,64)) #here, need to think about whether to directly reshape
                                         # or crop the image to aviod any distortion
                                         #investigate this with the new camera
    

@@ -32,26 +32,20 @@ def non_linear(pop):
 #%%
 #define parameters
 
-
-function_inputs = [0,0,0,0]
-desired_output = 300
-
-
 gene_space = {'low':0, 'high':75}
 
 def fitness_func(solution, solution_idx):
-    output = -solution[0]-solution[1]+test_func(solution[2],solution[3])
-    fitness = 1.0 / np.abs(output - desired_output)
+    output = np.sum(solution)
     return output
 
 
 fitness_function = fitness_func
 
-num_generations = 500
+num_generations = 1000
 num_parents_mating = 4
 
 sol_per_pop = 8
-num_genes = len(function_inputs)
+num_genes = 4
 
 init_range_low = 0
 init_range_high = 75
@@ -62,8 +56,29 @@ keep_parents = 1
 crossover_type = "single_point"
 
 mutation_type = "random"
-mutation_percent_genes = 10
+mutation_percent_genes = 12.5
 
+def on_start(ga_instance):
+    print("on_start()")
+
+def on_fitness(ga_instance, population_fitness):
+    print(population_fitness)
+
+def on_parents(ga_instance, selected_parents):
+    print(selected_parents)
+
+def on_crossover(ga_instance, offspring_crossover):
+    print(offspring_crossover)
+
+def on_mutation(ga_instance, offspring_mutation):
+    print(offspring_mutation)
+
+def on_generation(ga_instance):
+    print("on_generation()")
+
+def on_stop(ga_instance, last_population_fitness):
+    print("on_stop()")
+    
 #%%
 ga_instance = pygad.GA(num_generations=num_generations,
                        num_parents_mating=num_parents_mating,
@@ -77,7 +92,16 @@ ga_instance = pygad.GA(num_generations=num_generations,
                        crossover_type=crossover_type,
                        mutation_type=mutation_type,
                        mutation_percent_genes=mutation_percent_genes,
-                       gene_space = gene_space)
+                       gene_space = gene_space,
+                       #on_start=on_start,
+                       on_fitness=on_fitness,
+                       gene_type = int,
+                       #on_parents=on_parents,
+                       #on_crossover=on_crossover,
+                       #on_mutation=on_mutation,
+                       #on_generation=on_generation,
+                       #on_stop=on_stop,
+                       )
     
 ga_instance.run()
 
@@ -85,10 +109,7 @@ solution, solution_fitness, solution_idx = ga_instance.best_solution()
 print("Parameters of the best solution : {solution}".format(solution=solution))
 print("Fitness value of the best solution = {solution_fitness}".format(solution_fitness=solution_fitness))
 
-prediction = np.sum(np.array(function_inputs)*solution)
-print("Predicted output based on the best solution : {prediction}".format(prediction=prediction))
 
-    
     
 ga_instance.plot_fitness()
     

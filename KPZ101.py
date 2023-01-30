@@ -60,13 +60,9 @@ def Initialise(snum): # type(snum)=str
         return device
     
 def Set_V(device,V):
-    # Load the device configuration
-    device_config = device.GetPiezoConfiguration(snum)
-
-    # This shows how to obtain the device settings
-    device_settings = device.PiezoDeviceSettings
-    
+ 
     # Go to a voltage
+    V = float(V)
     dev_voltage = Decimal(V)
     print(f'Going to voltage {dev_voltage}')
 

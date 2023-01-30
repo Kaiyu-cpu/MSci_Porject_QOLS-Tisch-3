@@ -42,7 +42,7 @@ def get_Visib(pop):
     Visib_list=np.zeros(len(pop))
     for i in range(len(pop)):
         action(pop[i])
-        image=Get_image(cap,want_pic=False)
+        image=Get_image(cap)
         global count
         pop_num=count%8
         iteration_num=count//8

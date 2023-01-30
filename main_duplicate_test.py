@@ -4,7 +4,6 @@ This is a duplicate file of the main script to test the new functions,
 in real ussage use the main file
 """
 import random
-import multiprocessing
 from camera_reader import Get_image
 from fringe_analysis import Cal_Visib
 import cv2
@@ -41,7 +40,7 @@ def get_Visib(pop):
     Visib_list=np.zeros(len(pop))
     for i in range(len(pop)):
         action(pop[i])
-        image=Get_image(cap,want_pic=False)
+        image=Get_image(cap)
         global count
         pop_num=count%8
         iteration_num=count//8
@@ -83,37 +82,41 @@ for i in Serial_num:
 #define parameters
 
 
-function_inputs = [0,0,0,0]
-desired_output = 300
+#function_inputs = [0,0,0,0]
+#desired_output = 1
 
 
 gene_space = {'low':0, 'high':75}
 
 def fitness_func(solution, solution_idx):
-    output = -solution[0]-solution[1]+test_func(solution[2],solution[3])
-    fitness = 1.0 / np.abs(output - desired_output)
-    return output
+    action(solution)
+    image=Get_image(cap)
+    V = Cal_Visib(image)
+    fitness = -np.log(1-V)
+    return fitness
 
 
 fitness_function = fitness_func
 
-num_generations = 500
-num_parents_mating = 4
+num_generations = 10
+num_parents_mating = 8
 
 sol_per_pop = 8
-num_genes = len(function_inputs)
+num_genes = 4
 
 init_range_low = 0
 init_range_high = 75
 
 parent_selection_type = "sss"
-keep_parents = 1
+keep_parents = 2
 
 crossover_type = "single_point"
 
 mutation_type = "random"
-mutation_percent_genes = 10
+mutation_percent_genes = 12.5
 
+def on_fitness(ga_instance, population_fitness):
+    print(population_fitness)
 
 #%%
 ga_instance = pygad.GA(num_generations=num_generations,
@@ -128,16 +131,15 @@ ga_instance = pygad.GA(num_generations=num_generations,
                        crossover_type=crossover_type,
                        mutation_type=mutation_type,
                        mutation_percent_genes=mutation_percent_genes,
-                       gene_space = gene_space)
+                       gene_space = gene_space,
+                       on_fitness = on_fitness,
+                       gene_type = int)
     
 ga_instance.run()
 
 solution, solution_fitness, solution_idx = ga_instance.best_solution()
 print("Parameters of the best solution : {solution}".format(solution=solution))
 print("Fitness value of the best solution = {solution_fitness}".format(solution_fitness=solution_fitness))
-
-prediction = np.sum(np.array(function_inputs)*solution)
-print("Predicted output based on the best solution : {prediction}".format(prediction=prediction))
 
     
     
