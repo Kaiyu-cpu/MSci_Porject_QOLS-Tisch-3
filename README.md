@@ -1,8 +1,11 @@
-This is the GitHub repository of MSci Project (QOLS-Tisch-3) conducted by Kaiyu Hu and Chao Fan under supervision of Prof John Tisch
+This is the GitHub repository of MSci Project (QOLS-Tisch-3) conducted by Kaiyu Hu and Chao Fan, under supervision of Prof John Tisch from Imperial College London.
+
+Aim: Machine learning to optimise the fringe pattern of the MZ interferometer. 
+
 
 Module Description & Outlook:
 
-camera_reader: script that initialise the camera and take outputs from it
+camera_reader: read image from camera. $TO DO: adjust it to 64*64 image crop $
 
 fringe_analysis_refined: defined a function that evaluates the objective of the project (V: visibility)
 
