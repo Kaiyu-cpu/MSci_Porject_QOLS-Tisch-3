@@ -5,7 +5,6 @@ Created on Sun Jan 15 22:41:02 2023
 @author: Owen
 """
 import random
-import multiprocessing
 from camera_reader import Get_image
 from fringe_analysis import Cal_Visib
 import cv2
@@ -16,27 +15,7 @@ import matplotlib.pyplot as plt
 import time
 
 
-#%% 
-
-def linear(pop):
-    scores=[]
-    for i in range (len(pop)):
-        scores.append(sum(pop[i]))
-    return scores
-
-def test_func(x1,x2):
-    return (np.sin(np.pi*x1/86-2*np.pi*x2/51)**2+np.sin(np.pi*x2/102+2*np.pi*x1/43)**2)/(np.sqrt((x1-43)**2+(x2-51)**2)/10+1)
-
-def non_linear(pop):
-    scores=[]
-    for i in range (len(pop)):
-        x1=pop[i][0]
-        x2=pop[i][1]
-        x3=pop[i][2]
-        x4=pop[i][3]
-        y = -x3 -x4 +test_func(x1, x2) 
-        scores.append(y)
-    return scores
+#%% define useful functions here
 
 def get_Visib(pop):
     Visib_list=np.zeros(len(pop))
@@ -61,10 +40,18 @@ def action(Volt):
         Set_V(devices[i],Volt[i])
     
 
+def fitness_func(pop):
+    Visib_list = np.array(get_Visib(pop))
+    fitness_list = Visib_list - np.log(1-Visib_list) - 1
+    return fitness_list
+
+
+
+
 #%% Initilise K-Cubes and camera
 
 #set up the camera
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 
 #Serial numbers
 SN1="29500948" #M V
@@ -90,25 +77,115 @@ n_gene = 4
 pop = [random.sample(range(0,75), n_gene) for _ in range(n_pop)]
 
 n_run=1
-n_iteration=10
+n_iteration=500
 scores_ensemble=[]
 
 start=time.time()
 
+
+im_before = Get_image(cap)
+
+
+
 for i in range (n_run):
     # GA is used to MAXIMISE the target function
-    scores=GA(pop,target=get_Visib,n_iter=n_iteration,tournament_size=3)
+    scores=GA(pop,target=fitness_func,n_iter=n_iteration,tournament_size=3)
     scores_ensemble.append(scores)
 
 end=time.time()
 t=end-start
+
+im_after = Get_image(cap)
+
 print(f'time taken for {n_iteration}iter is {t}')
 scores_ensemble=np.array(scores_ensemble)
 ensemble_mean=scores_ensemble.mean(axis=0)
 
+#%% Bayesian module
+from bayes_opt import BayesianOptimization
+
+
+
+def Bayes_fitness(V1,V2,V3,V4):
+    V = np.array([V1,V2,V3,V4])
+    action(V)
+    image=Get_image(cap)
+    visib = Cal_Visib(image)
+    return visib - np.log(1-visib) - 1
+
+
+
+# Bounded region of parameter space
+pbounds = {'V1':(0,75),'V2':(0,75),'V3':(0,75),'V4':(0,75)}
+
+
+
+
+
+optimizer = BayesianOptimization(
+    f=Bayes_fitness,
+    pbounds=pbounds,
+    random_state=1,
+    allow_duplicate_points=True)
+
+
+optimizer.maximize(init_points=1,n_iter=30)
+
+plt.plot(range(1, 1 + len(optimizer.space.target)), optimizer.space.target, "-o")
+
+
+#%% PyGad module
+
+#define parameters
+gene_space = {'low':0, 'high':75}
+
+
+def pygad_fitness(V, V_idx):
+    action(V)
+    image=Get_image(cap)
+    visib = Cal_Visib(image)
+    return visib - np.log(1-visib) - 1
+
+
+fitness_function = pygad_fitness
+
+num_generations = 10
+num_parents_mating = 4
+
+sol_per_pop = 8
+num_genes = 4
+
+init_range_low = 0
+init_range_high = 75
+
+parent_selection_type = "sss"
+keep_parents = 1
+
+crossover_type = "single_point"
+
+mutation_type = "random"
+mutation_percent_genes = 12.5
+
+ga_instance = pygad.GA(num_generations=num_generations,
+                       num_parents_mating=num_parents_mating,
+                       fitness_func=fitness_function,
+                       sol_per_pop=sol_per_pop,
+                       num_genes=num_genes,
+                       init_range_low=init_range_low,
+                       init_range_high=init_range_high,
+                       parent_selection_type=parent_selection_type,
+                       keep_parents=keep_parents,
+                       crossover_type=crossover_type,
+                       mutation_type=mutation_type,
+                       mutation_percent_genes=mutation_percent_genes,
+                       gene_space = gene_space,
+                       gene_type = float)
+
+
 #%% this cell shuts down all devices
 for i in range (4):
     Kill(devices[i])
+
 
 #%% Plot of score vs iteration
 
@@ -146,7 +223,8 @@ plt.legend()
 plt.show()
 
 #%% 3D plot of test function
-
+'''
+below are temporarily useless codes saved up for later
 plt.rcParams["figure.figsize"] = [10, 10]
 plt.rcParams["figure.autolayout"] = True
 

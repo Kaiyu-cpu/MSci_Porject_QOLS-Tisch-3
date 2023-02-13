@@ -1,13 +1,13 @@
 import cv2
 import numpy as np
-import time
 
 
-def Get_image(camera):
+def Get_image(camera, l = 64):
     '''
     the function that returns an image array
     params:
     camera | opencv camera object
+    l | size of cropped image pixel
     returns:
     data: arrays of images
     '''
@@ -16,12 +16,13 @@ def Get_image(camera):
     ret, frame = camera.read()
 
     print("image shot")
-    data = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    data = np.array(data)
-    data = cv2.resize(data,(64,64)) #here, need to think about whether to directly reshape
-                                        # or crop the image to aviod any distortion
-                                        #investigate this with the new camera
-   
+    image = np.array(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY))
+
+    center = image.shape
+    x = center[1]/2 - l/2 
+    y = center[0]/2 - l/2 + 10 # to avoid camera defect
+
+    crop_img = image[int(y):int(y+l), int(x):int(x+l)]
     
-    return data
+    return crop_img
 
