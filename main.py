@@ -74,10 +74,10 @@ count = 0
 # initial population of random dna
 n_pop = 8
 n_gene = 4
-pop = [random.sample(range(0,75), n_gene) for _ in range(n_pop)]
+pop = [random.sample(range(0,150), n_gene) for _ in range(n_pop)]
 
 n_run=1
-n_iteration=500
+n_iteration=2
 scores_ensemble=[]
 
 start=time.time()
@@ -111,12 +111,12 @@ def Bayes_fitness(V1,V2,V3,V4):
     action(V)
     image=Get_image(cap)
     visib = Cal_Visib(image)
-    return visib - np.log(1-visib) - 1
+    return visib - np.log(1-visib)
 
 
 
 # Bounded region of parameter space
-pbounds = {'V1':(0,75),'V2':(0,75),'V3':(0,75),'V4':(0,75)}
+pbounds = {'V1':(0,150),'V2':(0,150),'V3':(0,150),'V4':(0,150)}
 
 
 
@@ -129,34 +129,34 @@ optimizer = BayesianOptimization(
     allow_duplicate_points=True)
 
 
-optimizer.maximize(init_points=1,n_iter=30)
+optimizer.maximize(init_points=1,n_iter=100)
 
 plt.plot(range(1, 1 + len(optimizer.space.target)), optimizer.space.target, "-o")
 
 
 #%% PyGad module
-
+import pygad
 #define parameters
-gene_space = {'low':0, 'high':75}
+gene_space = {'low':0, 'high':150}
 
 
 def pygad_fitness(V, V_idx):
     action(V)
     image=Get_image(cap)
     visib = Cal_Visib(image)
-    return visib - np.log(1-visib) - 1
+    return visib - np.log(1-visib)
 
 
 fitness_function = pygad_fitness
 
-num_generations = 10
+num_generations = 500
 num_parents_mating = 4
 
 sol_per_pop = 8
 num_genes = 4
 
 init_range_low = 0
-init_range_high = 75
+init_range_high = 150
 
 parent_selection_type = "sss"
 keep_parents = 1
@@ -164,7 +164,7 @@ keep_parents = 1
 crossover_type = "single_point"
 
 mutation_type = "random"
-mutation_percent_genes = 12.5
+mutation_percent_genes = 25
 
 ga_instance = pygad.GA(num_generations=num_generations,
                        num_parents_mating=num_parents_mating,
@@ -181,6 +181,15 @@ ga_instance = pygad.GA(num_generations=num_generations,
                        gene_space = gene_space,
                        gene_type = float)
 
+ga_instance.run()
+
+solution, solution_fitness, solution_idx = ga_instance.best_solution()
+print("Parameters of the best solution : {solution}".format(solution=solution))
+print("Fitness value of the best solution = {solution_fitness}".format(solution_fitness=solution_fitness))
+
+
+    
+ga_instance.plot_fitness()
 
 #%% this cell shuts down all devices
 for i in range (4):

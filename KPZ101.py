@@ -51,9 +51,10 @@ def Initialise(snum): # type(snum)=str
     
         # This shows how to obtain the device settings
         device_settings = device.PiezoDeviceSettings
-    
+       
+        #set maximum ouptput range to 150V
+        device.SetMaxOutputVoltage(Decimal(150.0))
         # Set the Zero point of the device
-        #print("Setting Zero Point")
         device.SetZero()
         print('device',snum,'initialised')
         

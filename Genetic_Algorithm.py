@@ -86,5 +86,5 @@ def mutation(dna, p_mut): #p_mut is the prob of mutation
         if random.randint(0,99) < p_mut*100:
             # mutate the gene
             #dna[i] = random.randint(0,75)
-            dna[i] = random.random()*75
+            dna[i] = random.random()*150
     return dna
