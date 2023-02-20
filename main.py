@@ -22,11 +22,6 @@ def get_Visib(pop):
     for i in range(len(pop)):
         action(pop[i])
         image=Get_image(cap)
-        global count
-        pop_num=count%8
-        iteration_num=count//8
-        count += 1
-        #cv2.imwrite(f'iteration {iteration_num}, population {pop_num}.png',image)
         Visib_list[i]=Cal_Visib(image)
     return Visib_list
 
@@ -109,8 +104,13 @@ from bayes_opt import BayesianOptimization
 def Bayes_fitness(V1,V2,V3,V4):
     V = np.array([V1,V2,V3,V4])
     action(V)
-    image=Get_image(cap)
-    visib = Cal_Visib(image)
+    visib_best = 0.0
+    for i in range(16): #reduce random noise by factor of 4
+        image=Get_image(cap)
+        visib = Cal_Visib(image)
+        if visib > visib_best:
+            visib_best = visib
+    visib = visib_best
     return visib - np.log(1-visib)
 
 
@@ -142,8 +142,13 @@ gene_space = {'low':0, 'high':150}
 
 def pygad_fitness(V, V_idx):
     action(V)
-    image=Get_image(cap)
-    visib = Cal_Visib(image)
+    visib_best = 0.0
+    for i in range(16): #reduce random noise by factor of 4
+        image=Get_image(cap)
+        visib = Cal_Visib(image)
+        if visib > visib_best:
+            visib_best = visib
+    visib = visib_best
     return visib - np.log(1-visib)
 
 
