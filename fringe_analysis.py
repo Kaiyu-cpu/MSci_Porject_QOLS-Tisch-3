@@ -9,6 +9,8 @@ Created on Mon Nov 21 20:39:39 2022
 import numpy as np
 from numpy.fft import fft2,fftshift,fftfreq
 import PIL
+from scipy.signal import savgol_filter, argrelextrema
+
 
 # functions to be used
 def Fringe(I0,V,f,x,y,phi):
@@ -93,7 +95,45 @@ def Cal_Visib(image):
         I[i] = np.sum(rotated_arr[:,i])
         N_pixels[i] = np.sum(Circular_Mask(N)[:,i])
     I_adjusted = I[1:]/N_pixels[1:]
-    V = (max(I_adjusted)-min(I_adjusted))/(max(I_adjusted)+min(I_adjusted))
+    
+    
+    I_smooth=savgol_filter(I_adjusted,5,3)
+    
+    I_max_indices=list(argrelextrema(I_smooth, np.greater)[0])
+    I_min_indices=list(argrelextrema(I_smooth, np.less)[0])
+
+    I_max=[]
+    I_min=[]
+
+    I_max_remove=[]
+    I_min_remove=[]
+
+    I_mean=np.mean(I_smooth)
+    for i in I_max_indices:
+        if(I_smooth[i]>I_mean):
+            I_max.append(I_smooth[i])
+        else:
+            I_max_remove.append(i)
+    for i in I_min_indices:
+        if(I_smooth[i]<I_mean):
+            I_min.append(I_smooth[i])
+        else:
+            I_min_remove.append(i)
+            
+    for i in I_max_remove:
+        I_max_indices.remove(i)
+        
+    for i in I_min_remove:
+        I_min_indices.remove(i)
+    
+    
+    I_max_mean=np.mean(I_max)
+    I_min_mean=np.mean(I_min)
+
+    V=(I_max_mean-I_min_mean)/(I_max_mean+I_min_mean)
+    
+    
+    #V = (max(I_adjusted)-min(I_adjusted))/(max(I_adjusted)+min(I_adjusted))
     print('calculate visib')
     
     return V

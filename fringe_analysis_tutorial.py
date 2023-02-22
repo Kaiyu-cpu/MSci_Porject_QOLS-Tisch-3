@@ -149,7 +149,7 @@ I_adjusted = I_adjusted[1:]
 plt.plot(I_adjusted)
 plt.xlabel('column index')
 plt.ylabel('$I_{mean}$ over one column')
-plt.xlim((0,63))
+plt.xlim((0,127))
 plt.grid()
 plt.show()
 
@@ -189,3 +189,66 @@ res = minimize(min_function, x0=guess, args=(x, I_adjusted))
 plt.plot(x,Sin_squared(x,*popt)-20)
 #plt.plot(x,Sin_squared(x,*res.x))
 plt.plot(I_adjusted)
+
+#%%
+from scipy.signal import savgol_filter
+from scipy.signal import argrelextrema
+I_smooth=savgol_filter(I_adjusted,5,3)
+plt.plot(I_smooth)
+
+I_max_indices=list(argrelextrema(I_smooth, np.greater)[0])
+I_min_indices=list(argrelextrema(I_smooth, np.less)[0])
+
+I_max=[]
+I_min=[]
+
+I_max_remove=[]
+I_min_remove=[]
+
+I_mean=np.mean(I_smooth)
+for i in I_max_indices:
+    if(I_smooth[i]>I_mean):
+        I_max.append(I_smooth[i])
+    else:
+        I_max_remove.append(i)
+for i in I_min_indices:
+    if(I_smooth[i]<I_mean):
+        I_min.append(I_smooth[i])
+    else:
+        I_min_remove.append(i)
+        
+for i in I_max_remove:
+    I_max_indices.remove(i)
+    
+for i in I_min_remove:
+    I_min_indices.remove(i)
+
+plt.scatter(I_max_indices,I_max)
+plt.scatter(I_min_indices,I_min)
+I_max_mean=np.mean(I_max)
+I_min_mean=np.mean(I_min)
+
+V=(I_max_mean-I_min_mean)/(I_max_mean+I_min_mean)
+print(V)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
