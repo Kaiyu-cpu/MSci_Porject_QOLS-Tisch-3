@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 
-def Get_image(camera, l = 64):
+def Get_image(camera, l = 128):
     '''
     the function that returns an image array
     params:

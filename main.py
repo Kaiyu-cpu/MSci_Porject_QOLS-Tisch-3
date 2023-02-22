@@ -104,14 +104,15 @@ from bayes_opt import BayesianOptimization
 def Bayes_fitness(V1,V2,V3,V4):
     V = np.array([V1,V2,V3,V4])
     action(V)
-    visib_best = 0.0
-    for i in range(16): #reduce random noise by factor of 4
-        image=Get_image(cap)
-        visib = Cal_Visib(image)
-        if visib > visib_best:
-            visib_best = visib
-    visib = visib_best
-    return visib - np.log(1-visib)
+    #visib_sum = 0.0
+    #for i in range(16): #reduce random noise by factor of 4
+        #image=Get_image(cap)
+       # visib = Cal_Visib(image)
+        #visib_sum += visib
+   # visib = visib_sum/16
+    image=Get_image(cap)
+    visib = Cal_Visib(image)
+    return visib - np.log10(1-visib)
 
 
 
@@ -125,12 +126,12 @@ pbounds = {'V1':(0,150),'V2':(0,150),'V3':(0,150),'V4':(0,150)}
 optimizer = BayesianOptimization(
     f=Bayes_fitness,
     pbounds=pbounds,
-    random_state=1,
+    random_state=0,
     allow_duplicate_points=True)
 
-
+im_before = Get_image(cap)
 optimizer.maximize(init_points=1,n_iter=100)
-
+im_after = Get_image(cap)
 plt.plot(range(1, 1 + len(optimizer.space.target)), optimizer.space.target, "-o")
 
 
@@ -142,19 +143,14 @@ gene_space = {'low':0, 'high':150}
 
 def pygad_fitness(V, V_idx):
     action(V)
-    visib_best = 0.0
-    for i in range(16): #reduce random noise by factor of 4
-        image=Get_image(cap)
-        visib = Cal_Visib(image)
-        if visib > visib_best:
-            visib_best = visib
-    visib = visib_best
+    image=Get_image(cap)
+    visib = Cal_Visib(image)
     return visib - np.log(1-visib)
 
 
 fitness_function = pygad_fitness
 
-num_generations = 500
+num_generations = 100
 num_parents_mating = 4
 
 sol_per_pop = 8
@@ -163,7 +159,7 @@ num_genes = 4
 init_range_low = 0
 init_range_high = 150
 
-parent_selection_type = "sss"
+parent_selection_type = "rank"
 keep_parents = 1
 
 crossover_type = "single_point"
