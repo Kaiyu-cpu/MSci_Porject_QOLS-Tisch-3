@@ -33,6 +33,7 @@ def action(Volt):
     '''
     for i in range (4):
         Set_V(devices[i],Volt[i])
+    time.sleep(0.5)
     
 
 def fitness_func(pop):
@@ -123,16 +124,45 @@ pbounds = {'V1':(0,150),'V2':(0,150),'V3':(0,150),'V4':(0,150)}
 
 
 
-optimizer = BayesianOptimization(
-    f=Bayes_fitness,
-    pbounds=pbounds,
-    random_state=0,
-    allow_duplicate_points=True)
 
-im_before = Get_image(cap)
-optimizer.maximize(init_points=1,n_iter=100)
-im_after = Get_image(cap)
-plt.plot(range(1, 1 + len(optimizer.space.target)), optimizer.space.target, "-o")
+
+
+import pandas as pd
+import PIL
+Big_array = []
+
+for i in range(1):
+    optimizer = BayesianOptimization(
+        f=Bayes_fitness,
+        pbounds=pbounds,
+        random_state=0,
+        allow_duplicate_points=True)
+    v_initial = []
+    for j in range(4):
+        v_initial.append(random.random()*150)
+    action(v_initial) #get a random starting point
+    im_before = Get_image(cap)
+    #plt.imshow(im_before,cmap='gray')
+    im = PIL.Image.fromarray(im_before.astype('uint8'),'L')
+    im.save('initial image {}.jpg'.format(i))
+    optimizer.maximize(init_points=1,n_iter=499)
+    V1 = optimizer.max['params']['V1']
+    V2 = optimizer.max['params']['V2']
+    V3 = optimizer.max['params']['V3']
+    V4 = optimizer.max['params']['V4']
+    action([V1,V2,V3,V4])
+    im_after = Get_image(cap)
+    #plt.imshow(im_after,cmap='gray') 
+    im = PIL.Image.fromarray(im_after.astype('uint8'),'L')
+    im.save('final image {}.jpg'.format(i))
+    records = optimizer.space.target
+    Big_array.append(records)
+    
+df = pd.DataFrame(Big_array)   
+
+df.to_csv('Bayesian record.csv')    
+    
+#plt.plot(range(1, 1 + len(optimizer.space.target)), optimizer.space.target, "-o")
 
 
 #%% PyGad module
@@ -158,6 +188,8 @@ num_genes = 4
 
 init_range_low = 0
 init_range_high = 150
+
+
 
 parent_selection_type = "rank"
 keep_parents = 1
