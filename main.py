@@ -131,7 +131,7 @@ import pandas as pd
 import PIL
 Big_array = []
 
-for i in range(1):
+for i in range(9):
     optimizer = BayesianOptimization(
         f=Bayes_fitness,
         pbounds=pbounds,
@@ -145,7 +145,7 @@ for i in range(1):
     #plt.imshow(im_before,cmap='gray')
     im = PIL.Image.fromarray(im_before.astype('uint8'),'L')
     im.save('initial image {}.jpg'.format(i))
-    optimizer.maximize(init_points=1,n_iter=499)
+    optimizer.maximize(init_points=1,n_iter=99)
     V1 = optimizer.max['params']['V1']
     V2 = optimizer.max['params']['V2']
     V3 = optimizer.max['params']['V3']
@@ -157,6 +157,7 @@ for i in range(1):
     im.save('final image {}.jpg'.format(i))
     records = optimizer.space.target
     Big_array.append(records)
+    
     
 df = pd.DataFrame(Big_array)   
 
@@ -199,31 +200,57 @@ crossover_type = "single_point"
 mutation_type = "random"
 mutation_percent_genes = 25
 
-ga_instance = pygad.GA(num_generations=num_generations,
-                       num_parents_mating=num_parents_mating,
-                       fitness_func=fitness_function,
-                       sol_per_pop=sol_per_pop,
-                       num_genes=num_genes,
-                       init_range_low=init_range_low,
-                       init_range_high=init_range_high,
-                       parent_selection_type=parent_selection_type,
-                       keep_parents=keep_parents,
-                       crossover_type=crossover_type,
-                       mutation_type=mutation_type,
-                       mutation_percent_genes=mutation_percent_genes,
-                       gene_space = gene_space,
-                       gene_type = float)
+import pandas as pd
+import PIL
 
-ga_instance.run()
-
-solution, solution_fitness, solution_idx = ga_instance.best_solution()
-print("Parameters of the best solution : {solution}".format(solution=solution))
-print("Fitness value of the best solution = {solution_fitness}".format(solution_fitness=solution_fitness))
-
-
+Big_array=[]
+for i in range(8):
+    v_initial = []
+    for j in range(4):
+        v_initial.append(random.random()*150)
+    action(v_initial) #get a random starting point
+    im_before = Get_image(cap)
+    #plt.imshow(im_before,cmap='gray')
+    im = PIL.Image.fromarray(im_before.astype('uint8'),'L')
+    im.save('initial image pygad{}.jpg'.format(i))
     
-ga_instance.plot_fitness()
+    
+    ga_instance = pygad.GA(num_generations=num_generations,
+                           num_parents_mating=num_parents_mating,
+                           fitness_func=fitness_function,
+                           sol_per_pop=sol_per_pop,
+                           num_genes=num_genes,
+                           init_range_low=init_range_low,
+                           init_range_high=init_range_high,
+                           parent_selection_type=parent_selection_type,
+                           keep_parents=keep_parents,
+                           crossover_type=crossover_type,
+                           mutation_type=mutation_type,
+                           mutation_percent_genes=mutation_percent_genes,
+                           gene_space = gene_space,
+                           gene_type = float,
+                           save_solutions=True)
+    
+    ga_instance.run()
+     
+    solution, solution_fitness, solution_idx = ga_instance.best_solution()
+    
+    print("Parameters of the best solution : {solution}".format(solution=solution))
+    print("Fitness value of the best solution = {solution_fitness}".format(solution_fitness=solution_fitness))
+    action(solution)
+    im_after = Get_image(cap)
+    #plt.imshow(im_after,cmap='gray') 
+    im = PIL.Image.fromarray(im_after.astype('uint8'),'L')
+    im.save('final image pygad{}.jpg'.format(i))
+    
+        
+    results = ga_instance.solutions_fitness
+    Big_array.append(results)
 
+df = pd.DataFrame(Big_array)   
+
+df.to_csv('Pygad record.csv')  
+ 
 #%% this cell shuts down all devices
 for i in range (4):
     Kill(devices[i])
