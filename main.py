@@ -176,7 +176,7 @@ def pygad_fitness(V, V_idx):
     action(V)
     image=Get_image(cap)
     visib = Cal_Visib(image)
-    return visib - np.log(1-visib)
+    return visib - np.log10(1-visib)
 
 
 fitness_function = pygad_fitness
