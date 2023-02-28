@@ -13,7 +13,11 @@ from KPZ101 import Initialise, Set_V, Kill
 from Genetic_Algorithm import GA
 import matplotlib.pyplot as plt
 import time
-
+from bayes_opt import BayesianOptimization
+import pandas as pd
+import PIL
+import pygad
+import datetime
 
 #%% define useful functions here
 
@@ -43,7 +47,6 @@ def fitness_func(pop):
 
 
 
-
 #%% Initilise K-Cubes and camera
 
 #set up the camera
@@ -63,54 +66,12 @@ devices = []
 for i in Serial_num:
     devices.append(Initialise(i))
 
-#%% Run GA get scores
-
-count = 0
-
-# initial population of random dna
-n_pop = 8
-n_gene = 4
-pop = [random.sample(range(0,150), n_gene) for _ in range(n_pop)]
-
-n_run=1
-n_iteration=2
-scores_ensemble=[]
-
-start=time.time()
-
-
-im_before = Get_image(cap)
-
-
-
-for i in range (n_run):
-    # GA is used to MAXIMISE the target function
-    scores=GA(pop,target=fitness_func,n_iter=n_iteration,tournament_size=3)
-    scores_ensemble.append(scores)
-
-end=time.time()
-t=end-start
-
-im_after = Get_image(cap)
-
-print(f'time taken for {n_iteration}iter is {t}')
-scores_ensemble=np.array(scores_ensemble)
-ensemble_mean=scores_ensemble.mean(axis=0)
 
 #%% Bayesian module
-from bayes_opt import BayesianOptimization
-
-
 
 def Bayes_fitness(V1,V2,V3,V4):
     V = np.array([V1,V2,V3,V4])
     action(V)
-    #visib_sum = 0.0
-    #for i in range(16): #reduce random noise by factor of 4
-        #image=Get_image(cap)
-       # visib = Cal_Visib(image)
-        #visib_sum += visib
-   # visib = visib_sum/16
     image=Get_image(cap)
     visib = Cal_Visib(image)
     return visib - np.log10(1-visib)
@@ -122,16 +83,9 @@ pbounds = {'V1':(0,150),'V2':(0,150),'V3':(0,150),'V4':(0,150)}
 
 
 
-
-
-
-
-
-import pandas as pd
-import PIL
 Big_array = []
-
-for i in range(9):
+date_string = str(datetime.datetime.now())
+for i in range(8):
     optimizer = BayesianOptimization(
         f=Bayes_fitness,
         pbounds=pbounds,
@@ -142,7 +96,6 @@ for i in range(9):
         v_initial.append(random.random()*150)
     action(v_initial) #get a random starting point
     im_before = Get_image(cap)
-    #plt.imshow(im_before,cmap='gray')
     im = PIL.Image.fromarray(im_before.astype('uint8'),'L')
     im.save('initial image {}.jpg'.format(i))
     optimizer.maximize(init_points=1,n_iter=99)
@@ -152,7 +105,6 @@ for i in range(9):
     V4 = optimizer.max['params']['V4']
     action([V1,V2,V3,V4])
     im_after = Get_image(cap)
-    #plt.imshow(im_after,cmap='gray') 
     im = PIL.Image.fromarray(im_after.astype('uint8'),'L')
     im.save('final image {}.jpg'.format(i))
     records = optimizer.space.target
@@ -161,16 +113,13 @@ for i in range(9):
     
 df = pd.DataFrame(Big_array)   
 
-df.to_csv('Bayesian record.csv')    
-    
-#plt.plot(range(1, 1 + len(optimizer.space.target)), optimizer.space.target, "-o")
+df.to_csv(date_string+'\Bayesian record'+date_string+'.csv')    
+
 
 
 #%% PyGad module
-import pygad
 #define parameters
 gene_space = {'low':0, 'high':150}
-
 
 def pygad_fitness(V, V_idx):
     action(V)
@@ -190,8 +139,6 @@ num_genes = 4
 init_range_low = 0
 init_range_high = 150
 
-
-
 parent_selection_type = "rank"
 keep_parents = 1
 
@@ -200,8 +147,6 @@ crossover_type = "single_point"
 mutation_type = "random"
 mutation_percent_genes = 25
 
-import pandas as pd
-import PIL
 
 Big_array=[]
 for i in range(8):
@@ -239,7 +184,6 @@ for i in range(8):
     print("Fitness value of the best solution = {solution_fitness}".format(solution_fitness=solution_fitness))
     action(solution)
     im_after = Get_image(cap)
-    #plt.imshow(im_after,cmap='gray') 
     im = PIL.Image.fromarray(im_after.astype('uint8'),'L')
     im.save('final image pygad{}.jpg'.format(i))
     
@@ -254,135 +198,3 @@ df.to_csv('Pygad record.csv')
 #%% this cell shuts down all devices
 for i in range (4):
     Kill(devices[i])
-
-
-#%% Plot of score vs iteration
-
-stop_list=np.zeros(n_run)
-
-for i in range (n_run):
-    plt.plot(scores_ensemble[i],alpha=0.5,linewidth=1)
-    # find the stop point 
-    temp=0
-    stop=0
-    for j in range (1,len(scores_ensemble[i])):
-        if scores_ensemble[i][j]!=scores_ensemble[i][j-1]:
-            temp=0
-        if temp>=100:
-            stop=j
-            stop_list[i]=stop
-            break
-        temp+=1
-    plt.plot(stop,scores_ensemble[i][stop],'.',color='r', alpha=0.7)
-
-plt.xlabel('Number of Iterations')
-plt.ylabel('Score')
-plt.grid()
-
-plt.plot(ensemble_mean,linewidth=3,label='ensemble mean')
-
-stop_mean=int(np.ceil(np.mean(stop_list))) # rounded up
-plt.plot(stop_mean,ensemble_mean[stop_mean],'o',color='r',label='stop point')
-
-end_score=round(ensemble_mean[stop_mean],2)
-plt.title(f'non-linear, pop={n_pop}, avg stop point={stop_mean}th iter, avg ending score={end_score}')
-
-plt.legend()
-
-plt.show()
-
-#%% 3D plot of test function
-'''
-below are temporarily useless codes saved up for later
-plt.rcParams["figure.figsize"] = [10, 10]
-plt.rcParams["figure.autolayout"] = True
-
-fig = plt.figure()
-
-ax = fig.add_subplot(111, projection='3d')
-
-xx1 = np.array(np.linspace(0, 150, 1501))
-xx2 = np.array(np.linspace(0, 150, 1501))
-x1,x2=np.meshgrid(xx1,xx2)
-
-y=test_func(x1,x2)
-
-ax.plot_surface(x1, x2, y, cmap="plasma")
-
-#find global max
-Max=0
-for i in range (len(xx1)):
-    if max(y[i])>Max:
-        Max=max(y[i])
-
-plt.show()
-        
-#%% Calculate stop point vs pop
-
-n_run=20 #number of runs in an ensemble
-stop_mean_list=[]
-end_score_list=[]
-
-for pop_size in range (4,21,2):
-    
-    n_gene = 4
-    pop = [random.sample(range(0,150), n_gene) for _ in range(pop_size)]
-    
-    scores_ensemble=[]
-    
-    for i in range (n_run):
-        # GA is used to MAXIMISE the target function
-        scores=GA(pop,target=non_linear,n_iter=1000,tournament_size=3)
-        scores_ensemble.append(scores)
-    
-    scores_ensemble=np.array(scores_ensemble)
-    ensemble_mean=scores_ensemble.mean(axis=0)
-        
-    stop_list=np.zeros(n_run)
-
-    for i in range (n_run):
-        # find the stop point 
-        temp=0
-        stop=0
-        for j in range (1,len(scores_ensemble[i])):
-            if scores_ensemble[i][j]!=scores_ensemble[i][j-1]:
-                temp=0
-            if temp>=100:
-                stop=j
-                stop_list[i]=stop
-                break
-            temp+=1
-            
-    stop_mean=int(np.ceil(np.mean(stop_list))) # rounded up
-    end_score=round(ensemble_mean[stop_mean],2) # rounded to 2 d.p.
-    stop_mean_list.append(stop_mean)
-    end_score_list.append(end_score)
-
-#%% Plot stop point vs pop
-
-pop_size=[i for i in range(4,21,2)]
-
-# create figure and axis objects with subplots()
-fig,ax = plt.subplots()
-# make a plot
-ax.plot(pop_size,
-        stop_mean_list,
-        color="red", 
-        marker="o")
-# set x-axis label
-ax.set_xlabel("population size", fontsize = 14)
-# set y-axis label
-ax.set_ylabel("average stop point",
-              color="red",
-              fontsize=14)
-
-# twin object for two different y-axis on the sample plot
-ax2=ax.twinx()
-# make a plot with different y-axis using second axis object
-ax2.plot(pop_size, end_score_list,color="blue",marker="o")
-ax2.set_ylabel("average ending score",color="blue",fontsize=14)
-plt.title(f'non-linear target function, ensemble size={n_run}')
-plt.show()
-
-
-
