@@ -46,6 +46,19 @@ def fitness_func(pop):
     return fitness_list
 
 
+def worst_start(camera):
+    V_list = []
+    Visib_list = []
+    for i in range(20):
+        V_arr = np.zeros(4)
+        for j in range(4):
+            V_arr[j] = random.random()*150
+        V_list.append(V_arr)
+        action(V_arr)
+        img = Get_image(camera)
+        Visib_list.append(Cal_Visib(img))
+    index = np.where(Visib_list == np.min(Visib_list))[0][0]
+    return V_list[index]
 
 #%% Initilise K-Cubes and camera
 
@@ -146,13 +159,13 @@ crossover_type = "single_point"
 
 mutation_type = "random"
 mutation_percent_genes = 25
-
+date_string = str(datetime.datetime.now())
+date_string = date_string.replace(':','_')
+date_string = date_string.replace('.','_')
 
 Big_array=[]
 for i in range(8):
-    v_initial = []
-    for j in range(4):
-        v_initial.append(random.random()*150)
+    v_initial = worst_start(cap)
     action(v_initial) #get a random starting point
     im_before = Get_image(cap)
     #plt.imshow(im_before,cmap='gray')
@@ -174,10 +187,11 @@ for i in range(8):
                            mutation_percent_genes=mutation_percent_genes,
                            gene_space = gene_space,
                            gene_type = float,
-                           save_solutions=True)
+                           save_solutions=True,
+                           keep_elitism=0)
     
     ga_instance.run()
-     
+    ga_instance.plot_fitness()
     solution, solution_fitness, solution_idx = ga_instance.best_solution()
     
     print("Parameters of the best solution : {solution}".format(solution=solution))
@@ -193,7 +207,7 @@ for i in range(8):
 
 df = pd.DataFrame(Big_array)   
 
-df.to_csv('Pygad record.csv')  
+df.to_csv('\PyGAD record'+date_string+'.csv') 
  
 #%% this cell shuts down all devices
 for i in range (4):
