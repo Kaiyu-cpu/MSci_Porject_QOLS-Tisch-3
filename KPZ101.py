@@ -41,7 +41,7 @@ def Initialise(snum): # type(snum)=str
         #print(device_info.Description)
     
         # Start polling and enable
-        device.StartPolling(100)  #100ms polling rate
+        device.StartPolling(50)  #100ms polling rate
         time.sleep(1)
         device.EnableDevice()
         time.sleep(0.25)  # Wait for device to enable
@@ -65,11 +65,11 @@ def Set_V(device,V):
     # Go to a voltage
     V = float(V)
     dev_voltage = Decimal(V)
-    print(f'Going to voltage {dev_voltage}')
+    #print(f'Going to voltage {dev_voltage}')
 
     device.SetOutputVoltage(dev_voltage)
-    time.sleep(0.2)
-    print(f'Moved to Voltage {device.GetOutputVoltage()}')
+    time.sleep(0.1)
+    #print(f'Moved to Voltage {device.GetOutputVoltage()}')
     
 
 

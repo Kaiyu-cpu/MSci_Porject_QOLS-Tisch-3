@@ -10,7 +10,7 @@ import numpy as np
 from numpy.fft import fft2,fftshift,fftfreq
 import PIL
 from scipy.signal import savgol_filter, argrelextrema
-
+import matplotlib.pyplot as plt
 
 # functions to be used
 def Fringe(I0,V,f,x,y,phi):
@@ -67,6 +67,7 @@ def Cal_Visib(image):
         V: the visibility reading from the image. range 0~1.
     '''
     N = len(image) # the side length of the image.
+    circular_mask = Circular_Mask(N)
     image = np.multiply(image, Circular_Mask(N)) # apply the aperture mask
     
     fft_img = fftshift(fft2(image))
@@ -88,43 +89,19 @@ def Cal_Visib(image):
     
     #calculate visibility from here
     #sum intensity over all pixel columns
-    I = np.zeros(N)
-    # count number of valid pixels over all pixel columns
-    N_pixels = np.zeros(N)
-    for i in range(N):
-        I[i] = np.sum(rotated_arr[:,i])
-        N_pixels[i] = np.sum(Circular_Mask(N)[:,i])
+    I = np.sum(rotated_arr, axis=0)
+    N_pixels = np.sum(circular_mask, axis=0)
     I_adjusted = I[1:]/N_pixels[1:]
     
-    
+    #plt.plot(I_adjusted)
+    plt.show()
     I_smooth=savgol_filter(I_adjusted,5,3)
-    
+    #plt.plot(I_smooth)
     I_max_indices=list(argrelextrema(I_smooth, np.greater)[0])
     I_min_indices=list(argrelextrema(I_smooth, np.less)[0])
 
-    I_max=[]
-    I_min=[]
-
-    I_max_remove=[]
-    I_min_remove=[]
-
-    I_mean=np.mean(I_smooth)
-    for i in I_max_indices:
-        if(I_smooth[i]>I_mean):
-            I_max.append(I_smooth[i])
-        else:
-            I_max_remove.append(i)
-    for i in I_min_indices:
-        if(I_smooth[i]<I_mean):
-            I_min.append(I_smooth[i])
-        else:
-            I_min_remove.append(i)
-            
-    for i in I_max_remove:
-        I_max_indices.remove(i)
-        
-    for i in I_min_remove:
-        I_min_indices.remove(i)
+    I_max = I_smooth[I_max_indices][I_smooth[I_max_indices] > np.mean(I_smooth)]
+    I_min = I_smooth[I_min_indices][I_smooth[I_min_indices] < np.mean(I_smooth)]
     
     
     I_max_mean=np.mean(I_max)
@@ -134,7 +111,7 @@ def Cal_Visib(image):
     
     
     #V = (max(I_adjusted)-min(I_adjusted))/(max(I_adjusted)+min(I_adjusted))
-    print('calculate visib')
+   # print('calculate visib')
     
     return V
 

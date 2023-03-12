@@ -30,7 +30,7 @@ bottom_right_x = center_x + int(box_size / 2)
 bottom_right_y = center_y + int(box_size / 2)
 
 
-arr = []
+#arr = []
 while True:
 
     keypressed = cv2.waitKey(30)
@@ -38,7 +38,7 @@ while True:
     if count  == 30:
         img = Get_image(cap)
         visib = str(round(Cal_Visib(img),4)) 
-        arr.append(visib)
+       # arr.append(visib)
         count = 1
     else:
         count += 1

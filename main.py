@@ -37,7 +37,7 @@ def action(Volt):
     '''
     for i in range (4):
         Set_V(devices[i],Volt[i])
-    time.sleep(0.5)
+    time.sleep(0.6)
     
 
 def fitness_func(pop):
@@ -85,7 +85,11 @@ for i in Serial_num:
 def Bayes_fitness(V1,V2,V3,V4):
     V = np.array([V1,V2,V3,V4])
     action(V)
+    #V = np.zeros(5)
+    #for i in range(5):
     image=Get_image(cap)
+        #V[i] = Cal_Visib(image)
+   # visib = np.mean(V[abs(V - np.mean(V)) < np.std(V)])
     visib = Cal_Visib(image)
     return visib - np.log10(1-visib)
 
@@ -98,8 +102,11 @@ pbounds = {'V1':(0,150),'V2':(0,150),'V3':(0,150),'V4':(0,150)}
 
 Big_array = []
 date_string = str(datetime.datetime.now())
-for i in range(8):
-    optimizer = BayesianOptimization(
+date_string = date_string.replace(':','_')
+date_string = date_string.replace('.','_')
+
+for i in range(16):
+    optimizer = BayesianOptimization(   
         f=Bayes_fitness,
         pbounds=pbounds,
         random_state=0,
@@ -108,25 +115,30 @@ for i in range(8):
     for j in range(4):
         v_initial.append(random.random()*150)
     action(v_initial) #get a random starting point
-    im_before = Get_image(cap)
-    im = PIL.Image.fromarray(im_before.astype('uint8'),'L')
-    im.save('initial image {}.jpg'.format(i))
-    optimizer.maximize(init_points=1,n_iter=99)
+    im_before = Get_image(cap,color=True)
+    plt.imshow(im_before[:,:,[2,1,0]])
+    plt.show()
+    #im.save('initial image {}.jpg'.format(i))
+    optimizer.maximize(init_points=1,n_iter=200)
     V1 = optimizer.max['params']['V1']
     V2 = optimizer.max['params']['V2']
     V3 = optimizer.max['params']['V3']
+    
     V4 = optimizer.max['params']['V4']
     action([V1,V2,V3,V4])
-    im_after = Get_image(cap)
-    im = PIL.Image.fromarray(im_after.astype('uint8'),'L')
-    im.save('final image {}.jpg'.format(i))
+    im_after = Get_image(cap,color=True)
+    plt.imshow(im_after[:,:,[2,1,0]])
+    plt.show()
+    #im = PIL.Image.fromarray(im_after.astype('uint8'),'L')
+    #im.sa ve('final image {}.jpg'.format(i))
     records = optimizer.space.target
     Big_array.append(records)
-    
+    plt.plot(range(1, 1 + len(optimizer.space.target)), optimizer.space.target, "-o")
+    plt.show()
     
 df = pd.DataFrame(Big_array)   
 
-df.to_csv(date_string+'\Bayesian record'+date_string+'.csv')    
+df.to_csv('Bayesian record'+date_string+'.csv')    
 
 
 
@@ -143,7 +155,7 @@ def pygad_fitness(V, V_idx):
 
 fitness_function = pygad_fitness
 
-num_generations = 100
+num_generations = 200
 num_parents_mating = 4
 
 sol_per_pop = 8
@@ -165,12 +177,14 @@ date_string = date_string.replace('.','_')
 
 Big_array=[]
 for i in range(8):
-    v_initial = worst_start(cap)
-    action(v_initial) #get a random starting point
-    im_before = Get_image(cap)
+    #v_initial = worst_start(cap)
+    #action(v_initial) #get a random starting point
+    im_before = Get_image(cap,color=True)
     #plt.imshow(im_before,cmap='gray')
-    im = PIL.Image.fromarray(im_before.astype('uint8'),'L')
-    im.save('initial image pygad{}.jpg'.format(i))
+    #im = PIL.Image.fromarray(im_before.astype('uint8'),'L')
+    plt.imshow(im_before[:,:,[2,1,0]])
+    plt.show()
+    #im.save('initial image pygad{}.jpg'.format(i))
     
     
     ga_instance = pygad.GA(num_generations=num_generations,
@@ -197,18 +211,22 @@ for i in range(8):
     print("Parameters of the best solution : {solution}".format(solution=solution))
     print("Fitness value of the best solution = {solution_fitness}".format(solution_fitness=solution_fitness))
     action(solution)
-    im_after = Get_image(cap)
-    im = PIL.Image.fromarray(im_after.astype('uint8'),'L')
-    im.save('final image pygad{}.jpg'.format(i))
+    im_after = Get_image(cap,color=True)
+    #im = PIL.Image.fromarray(im_after.astype('uint8'),'L')
+    #im.save('final image pygad{}.jpg'.format(i))
+    plt.imshow(im_after[:,:,[2,1,0]])
+    plt.show()
     
         
     results = ga_instance.solutions_fitness
+    plt.show()
     Big_array.append(results)
 
 df = pd.DataFrame(Big_array)   
 
-df.to_csv('\PyGAD record'+date_string+'.csv') 
+df.to_csv('PyGAD record'+date_string+'.csv') 
  
-#%% this cell shuts down all devices
+
+ #%% this cell shuts down all devices
 for i in range (4):
     Kill(devices[i])
