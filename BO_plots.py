@@ -139,7 +139,7 @@ for i in range (len(good)):
 
 #%% Both (BO99, GA100)
 
-V_0=np.interp(0.967718, y, temp)
+V_0=0.47
 
 V_ensemble = pd.DataFrame(V_ensemble)
 
@@ -183,7 +183,7 @@ ax2.set_ylabel("Fitness function",fontsize=15)
 
 formatter = mticker.FuncFormatter(lambda x, pos:'{:.1f}'.format(x-np.log10(1-x)))
 ax2.yaxis.set_major_formatter(formatter)
-ax1.set_ylim(0.55,1)
+ax1.set_ylim(0.45,1)
 ax2.set_ylim(ax1.get_ylim())
 plt.show()
 
