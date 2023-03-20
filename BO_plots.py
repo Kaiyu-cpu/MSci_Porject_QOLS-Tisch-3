@@ -19,16 +19,16 @@ def fitness_wrong(V):
 
 #%% BO
 df1 = pd.DataFrame()
-df1 = pd.read_csv("0223_BO_records/Bayesian_0223.csv")
+df1 = pd.read_csv("Bayesian record2023-03-12 16_55_16_844122.csv")
 
-
-df2 = pd.DataFrame()
-df2 = pd.read_csv("Bayesian_0224.csv")
-df = pd.concat([df1,df2])
+df = df1
+#df2 = pd.DataFrame()
+#df2 = pd.read_csv("Bayesian_0224.csv")
+#df = pd.concat([df1,df2])
 
 #%% BO
 
-for i in range (17):
+for i in range (len(df)):
     plt.title("{}".format(i))
     plt.plot(df.iloc[i][1:])
     plt.show()
@@ -36,7 +36,7 @@ for i in range (17):
 #%% GA
 
 df = pd.DataFrame()
-df = pd.read_csv("Pygad_record.csv")
+df = pd.read_csv("PyGAD record2023-03-12 18_41_43_220226.csv")
 
 Big_list=[]
 for i in range(8):
@@ -46,7 +46,7 @@ for i in range(8):
         sub_section = x[j:j+8]
         iter_list.append(max(sub_section))
             
-    #plt.plot(iter_list)
+    plt.plot(iter_list)
     plt.show()
     Big_list.append(iter_list)
   
@@ -55,14 +55,14 @@ ensemble = pd.DataFrame(Big_list)
 temp=np.linspace(0,1,1000)
 y=[]
 for i in temp:
-    y.append(fitness_wrong(i))
+    y.append(fitness(i))
 V_ensemble=[]
 for i in range (8):
     V_ensemble.append (np.interp(ensemble.iloc[i], y, temp))
 
 
 #%% BO
-good =[0,2,4,5,9,10,11,12]
+good =[1,4,5,6,7,8,10,11,12,15]
 ensemble=[]
 for i in good:
     ensemble.append(df.iloc[i][1:])
@@ -83,15 +83,15 @@ mean=V_ensemble.mean(axis=0)
 
 std=V_ensemble.std(axis=0)
 
-x=np.linspace(0,100,101)
+x=np.linspace(0,200,201)
 
-fig, ax1 = plt.subplots(figsize=(9, 6))
+fig, ax1 = plt.subplots(figsize=(12, 8))
 
 plt.grid()
 ax2 = ax1.twinx()
 
 ax1.plot(x,mean,color='blue')
-xtick=np.linspace(0,100,11)
+xtick=np.linspace(0,200,21)
 ax1.set_xticks(xtick)
 #ax1.set_yticks([0.5,0.7,0.9,1.1,1.3,1.5])
 
@@ -109,7 +109,7 @@ ax2.set_ylabel("Fitness function",fontsize=15)
 
 formatter = mticker.FuncFormatter(lambda x, pos:'{:.1f}'.format(x-np.log10(1-x)))
 ax2.yaxis.set_major_formatter(formatter)
-ax1.set_ylim(0.65,1)
+ax1.set_ylim(0.75,1)
 ax2.set_ylim(ax1.get_ylim())
 plt.show()
 

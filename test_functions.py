@@ -5,6 +5,8 @@ Created on Mon Feb 13 10:17:12 2023
 @author: chaof
 """
 import numpy as np
+import matplotlib.pyplot as plt
+
 
 def linear(pop):
     scores=[]
@@ -27,23 +29,26 @@ def non_linear(pop):
     return scores
 
 #%% 3D plot of test function
-'''
-below are temporarily useless codes saved up for later
-plt.rcParams["figure.figsize"] = [10, 10]
+
+#below are temporarily useless codes saved up for later
+plt.rcParams["figure.figsize"] = [12, 12]
 plt.rcParams["figure.autolayout"] = True
 
 fig = plt.figure()
 
 ax = fig.add_subplot(111, projection='3d')
 
-xx1 = np.array(np.linspace(0, 150, 1501))
-xx2 = np.array(np.linspace(0, 150, 1501))
+xx1 = np.array(np.linspace(0, 100, 1501))
+xx2 = np.array(np.linspace(0, 100, 1501))
 x1,x2=np.meshgrid(xx1,xx2)
 
 y=test_func(x1,x2)
 
-ax.plot_surface(x1, x2, y, cmap="plasma")
+ax.plot_surface(x1, x2, y, cmap="coolwarm")
 
+ax.set_xlabel('x1',fontsize=20)
+ax.set_ylabel('x2',fontsize=20)
+ax.set_zlabel('objective',fontsize=20)
 #find global max
 Max=0
 for i in range (len(xx1)):

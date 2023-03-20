@@ -39,7 +39,7 @@ def pol2cart(rho, phi):
     return(x, y)
 
 #%% test using a real image
-image = cv2.imread("V.png")
+image = cv2.imread("/Users/fanchao/Desktop/Imperial/Year 4/Msci_Project/Plots and graphs/V.png")
 l = 128
 center = image.shape
 x = center[1]/2 - l/2 
@@ -114,7 +114,7 @@ print(kx_half[ind],-ky_half[ind])  #note that ky starts from negative values
 rotation_angle = np.arctan(-ky_half[ind]/kx_half[ind])
 
 image = PIL.Image.fromarray(image.astype('uint8'),'L')
-image = image.rotate(-rotation_angle/(2*np.pi)*360)
+image = image.rotate(-rotation_angle/(2*np.pi)*360-0.5)
 
 plt.imshow(image,cmap='gray')
 plt.axis('off')
@@ -134,15 +134,17 @@ for i in range(len(N)):
 
 #%%
 plt.figure(dpi=1500)
-plt.rcParams["figure.figsize"] = (10,6)
+plt.rcParams["figure.figsize"] = (12,8)
 plt.rcParams.update({'font.size': 22})
 plt.plot(I)
-plt.xlabel('x\'')
-plt.ylabel('Sum of Intensities at each pixel on the row')
+plt.xlabel('column index')
+plt.ylabel('Sum of $I$ over one column')
+plt.grid()
 plt.show()
 plt.plot(N)
-plt.xlabel('x\'')
+plt.xlabel('column index')
 plt.ylabel('number of valid pixel points')
+plt.grid()
 plt.show()
 I_adjusted = I/N
 I_adjusted = I_adjusted[1:]
@@ -194,7 +196,7 @@ plt.plot(I_adjusted)
 from scipy.signal import savgol_filter
 from scipy.signal import argrelextrema
 I_smooth=savgol_filter(I_adjusted,5,3)
-plt.plot(I_smooth)
+plt.plot(I_smooth, label='smoothed data')
 
 I_max_indices=list(argrelextrema(I_smooth, np.greater)[0])
 I_min_indices=list(argrelextrema(I_smooth, np.less)[0])
@@ -223,11 +225,15 @@ for i in I_max_remove:
 for i in I_min_remove:
     I_min_indices.remove(i)
 
-plt.scatter(I_max_indices,I_max)
-plt.scatter(I_min_indices,I_min)
+plt.scatter(I_max_indices,I_max, s = 50, color = 'red',label='maxima')
+plt.scatter(I_min_indices,I_min, s = 50, color = 'orange', label ='minima')
 I_max_mean=np.mean(I_max)
 I_min_mean=np.mean(I_min)
-
+plt.ylim(50,255)
+plt.legend()
+plt.grid()
+plt.xlabel('column index')
+plt.ylabel('$I_{mean}$ over one column')
 V=(I_max_mean-I_min_mean)/(I_max_mean+I_min_mean)
 print(V)
 
