@@ -9,9 +9,36 @@ Created on Tue Feb 28 12:26:51 2023
 import cv2
 from fringe_analysis import Cal_Visib
 from camera_reader import Get_image
+from KPZ101 import Initialise,Set_V
+def action(Volt):
+    '''
+    function to adjust the voltages of the kpz piezos
+    Input: Volt - type list: the input voltages of 4 mounts
+    
+    '''
+    for i in range (4):
+        Set_V(devices[i],Volt[i])
+    #time.sleep(sleep_time)
+#%%
 
 cap = cv2.VideoCapture(1)
+#Serial numbers
+SN1="29500948" #M V
+SN2="29500732" #M H
+SN3="29501050" #BS V
+SN4="29500798" #BS H
 
+Serial_num = [SN1, SN2, SN3, SN4]
+
+
+#set up devices
+devices = []
+for i in Serial_num:
+    devices.append(Initialise(i))
+    
+
+
+#%%
 count = 0
 font = cv2.FONT_HERSHEY_SIMPLEX
 global visib
@@ -36,11 +63,12 @@ import tkinter as tk
 # Define your function that interacts with user input
 def do_something_with_input(input_value):
     # Do something with the user input
-    print("User input:", input_value)
+    #V_list = [int(num) for num in input_value.split(',')]
+    action(input_value)
 
 # Define your loop function
 def loop_function(visib):
-    cap = cv2.VideoCapture(0)
+    #cap = cv2.VideoCapture(1)
     font = cv2.FONT_HERSHEY_SIMPLEX
     count = 1
     top_left_x, top_left_y = 100, 100
@@ -48,17 +76,29 @@ def loop_function(visib):
 
     # Create a tkinter window
     window = tk.Tk()
-
+    '''
     # Create a label and textbox for user input
     label = tk.Label(window, text="Enter a value:")
     label.pack()
     textbox = tk.Entry(window)
     textbox.pack()
+    '''
+  
 
+    # Create 4 slider bars for user input
+    slider1 = tk.Scale(window, from_=0, to=150, orient=tk.HORIZONTAL, label="M2  Vetical")
+    slider2 = tk.Scale(window, from_=0, to=150, orient=tk.HORIZONTAL, label="M2 Horizontal")
+    slider3 = tk.Scale(window, from_=0, to=150, orient=tk.HORIZONTAL, label="BS2 Vetical")
+    slider4 = tk.Scale(window, from_=0, to=150, orient=tk.HORIZONTAL, label="BS2 Horizontal")
+    slider1.pack()
+    slider2.pack()
+    slider3.pack()
+    slider4.pack()
+    
     # Create a button to submit the user input
     def submit_input():
-        input_value = textbox.get()
-        do_something_with_input(input_value)
+        input_values = [slider1.get(), slider2.get(), slider3.get(), slider4.get()]
+        do_something_with_input(input_values)
     submit_button = tk.Button(window, text="Submit", command=submit_input)
     submit_button.pack()
 

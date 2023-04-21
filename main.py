@@ -29,7 +29,7 @@ def get_Visib(pop):
         Visib_list[i]=Cal_Visib(image)
     return Visib_list
 
-def action(Volt):
+def action(Volt,sleep_time = 0.6):
     '''
     function to adjust the voltages of the kpz piezos
     Input: Volt - type list: the input voltages of 4 mounts
@@ -37,7 +37,7 @@ def action(Volt):
     '''
     for i in range (4):
         Set_V(devices[i],Volt[i])
-    time.sleep(0.6)
+    time.sleep(sleep_time)
     
 
 def fitness_func(pop):
@@ -91,7 +91,7 @@ def Bayes_fitness(V1,V2,V3,V4):
         #V[i] = Cal_Visib(image)
    # visib = np.mean(V[abs(V - np.mean(V)) < np.std(V)])
     visib = Cal_Visib(image)
-    return visib - np.log10(1-visib)
+    return visib #- np.log10(1-visib)
 
 
 
@@ -119,7 +119,7 @@ for i in range(16):
     plt.imshow(im_before[:,:,[2,1,0]])
     plt.show()
     #im.save('initial image {}.jpg'.format(i))
-    optimizer.maximize(init_points=1,n_iter=200)
+    optimizer.maximize(init_points=1,n_iter=300)
     V1 = optimizer.max['params']['V1']
     V2 = optimizer.max['params']['V2']
     V3 = optimizer.max['params']['V3']
@@ -132,7 +132,7 @@ for i in range(16):
     #im = PIL.Image.fromarray(im_after.astype('uint8'),'L')
     #im.sa ve('final image {}.jpg'.format(i))
     records = optimizer.space.target
-    Big_array.append(records)
+    Big_array.append(records) 
     plt.plot(range(1, 1 + len(optimizer.space.target)), optimizer.space.target, "-o")
     plt.show()
     
